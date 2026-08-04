@@ -1,0 +1,26 @@
+# Database
+*.db
+*.db-journal
+
+# Environment variables / secrets
+.env
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Build artifacts
+/bin/
+/dist/
+jeycyl
+server
+
+# Go
+*.test
+*.out
+
+# OS/editor
+.DS_Store
+*.swp
+.vscode/
+.idea/
