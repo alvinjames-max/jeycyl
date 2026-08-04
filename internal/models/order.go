@@ -27,3 +27,22 @@ type Order struct {
 
 	Items []OrderItem `json:"items,omitempty"`
 }
+
+type OrderItem struct {
+	ID            int64   `json:"id"`
+	OrderID       int64   `json:"order_id"`
+	CakeID        int64   `json:"cake_id"`
+	CakeVariantID *int64  `json:"cake_variant_id,omitempty"`
+	Quantity      int     `json:"quantity"`
+	UnitPrice     float64 `json:"unit_price"`
+	CustomMessage string  `json:"custom_message,omitempty"`
+	Subtotal      float64 `json:"subtotal"`
+}
+
+type PaymentMethod string
+
+const (
+	PaymentMethodMpesa PaymentMethod = "mpesa"
+	PaymentMethodCash  PaymentMethod = "cash"
+	PaymentMethodCard  PaymentMethod = "card"
+)
