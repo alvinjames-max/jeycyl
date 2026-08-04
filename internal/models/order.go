@@ -46,3 +46,22 @@ const (
 	PaymentMethodCash  PaymentMethod = "cash"
 	PaymentMethodCard  PaymentMethod = "card"
 )
+
+type PaymentStatus string
+
+const (
+	PaymentStatusPending   PaymentStatus = "pending"
+	PaymentStatusCompleted PaymentStatus = "completed"
+	PaymentStatusFailed    PaymentStatus = "failed"
+)
+
+type Payment struct {
+	ID             int64         `json:"id"`
+	OrderID        int64         `json:"order_id"`
+	Amount         float64       `json:"amount"`
+	Method         PaymentMethod `json:"method"`
+	TransactionRef string        `json:"transaction_ref,omitempty"`
+	Status         PaymentStatus `json:"status"`
+	PaidAt         *time.Time    `json:"paid_at,omitempty"`
+	CreatedAt      time.Time     `json:"created_at"`
+}
