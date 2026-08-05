@@ -64,3 +64,30 @@ func (r *CakeRepository) GetByID(id int64) (*models.Cake, error) {
 
 	return &c, nil
 }
+
+func (r *CakeRepository) variantsForCake(cakeID int64) ([]models.CakeVariant, error) {
+	rows, err := r.db.Query(`
+		SELECT id, cake_id, size, flavor, price_modifier
+		FROM cake_variants
+		WHERE cake_id = ?
+		ORDER BY size
+	`, cakeID)
+	if err != nil {
+		return nil, fmt.Errorf("listing variants for cake %d: %w", cakeID, err)
+	}
+	defer rows.Close()
+
+	var variants []models.CakeVariant
+	for rows.Next() {
+		var v models.CakeVariant
+		if err := rows.Scan(&v.ID, &v.CakeID, &v.Size, &v.Flavor, &v.PriceModifier); err != nil {
+			return nil, fmt.Errorf("scanning variant: %w", err)
+		}
+		variants = append(variants, v)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating variants: %w", err)
+	}
+
+	return variants, nil
+}
