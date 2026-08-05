@@ -113,3 +113,18 @@ func (s *OrderService) GetOrder(id int64) (*models.Order, error) {
 	}
 	return order, nil
 }
+
+func (s *OrderService) ListCustomerOrders(customerID int64) ([]models.Order, error) {
+	orders, err := s.orderRepo.ListByCustomer(customerID)
+	if err != nil {
+		return nil, fmt.Errorf("listing orders for customer %d: %w", customerID, err)
+	}
+	return orders, nil
+}
+
+func (s *OrderService) UpdateStatus(id int64, status models.OrderStatus) error {
+	if err := s.orderRepo.UpdateStatus(id, status); err != nil {
+		return fmt.Errorf("updating order %d status: %w", id, err)
+	}
+	return nil
+}
