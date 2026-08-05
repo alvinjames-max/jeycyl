@@ -102,3 +102,14 @@ func (s *OrderService) PlaceOrder(req PlaceOrderRequest) (*models.Order, error) 
 
 	return order, nil
 }
+
+func (s *OrderService) GetOrder(id int64) (*models.Order, error) {
+	order, err := s.orderRepo.GetByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("getting order %d: %w", id, err)
+	}
+	if order == nil {
+		return nil, fmt.Errorf("order %d not found", id)
+	}
+	return order, nil
+}
