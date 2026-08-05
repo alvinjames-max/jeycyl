@@ -91,3 +91,28 @@ func (r *CakeRepository) variantsForCake(cakeID int64) ([]models.CakeVariant, er
 
 	return variants, nil
 }
+
+func (r *CakeRepository) Create(c *models.Cake) (int64, error) {
+	res, err := r.db.Exec(`
+		INSERT INTO cakes (name, description, base_price, image_url, is_available)
+		VALUES (?, ?, ?, ?, ?)
+	`, c.Name, c.Description, c.BasePrice, c.ImageURL, c.IsAvailable)
+	if err != nil {
+		return 0, fmt.Errorf("creating cake: %w", err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("getting new cake id: %w", err)
+	}
+
+	return id, nil
+}
+
+func (r *CakeRepository) SetAvailability(id int64, available bool) error {
+	_, err := r.db.Exec(`UPDATE cakes SET is_available = ? WHERE id = ?`, available, id)
+	if err != nil {
+		return fmt.Errorf("updating cake %d availability: %w", id, err)
+	}
+	return nil
+}
