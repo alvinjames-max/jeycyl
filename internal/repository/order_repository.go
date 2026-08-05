@@ -51,3 +51,52 @@ func (r *OrderRepository) Create(o *models.Order) (int64, error) {
 
 	return orderID, nil
 }
+
+func (r *OrderRepository) GetByID(id int64) (*models.Order, error) {
+	var o models.Order
+	err := r.db.QueryRow(`
+		SELECT id, customer_id, status, delivery_date, delivery_address, notes, total_amount, created_at, updated_at
+		FROM orders
+		WHERE id = ?
+	`, id).Scan(&o.ID, &o.CustomerID, &o.Status, &o.DeliveryDate, &o.DeliveryAddress, &o.Notes, &o.TotalAmount, &o.CreatedAt, &o.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("getting order %d: %w", id, err)
+	}
+
+	items, err := r.itemsForOrder(id)
+	if err != nil {
+		return nil, err
+	}
+	o.Items = items
+
+	return &o, nil
+}
+
+func (r *OrderRepository) itemsForOrder(orderID int64) ([]models.OrderItem, error) {
+	rows, err := r.db.Query(`
+		SELECT id, order_id, cake_id, cake_variant_id, quantity, unit_price, custom_message, subtotal
+		FROM order_items
+		WHERE order_id = ?
+	`, orderID)
+	if err != nil {
+		return nil, fmt.Errorf("listing items for order %d: %w", orderID, err)
+	}
+	defer rows.Close()
+
+	var items []models.OrderItem
+	for rows.Next() {
+		var i models.OrderItem
+		if err := rows.Scan(&i.ID, &i.OrderID, &i.CakeID, &i.CakeVariantID, &i.Quantity, &i.UnitPrice, &i.CustomMessage, &i.Subtotal); err != nil {
+			return nil, fmt.Errorf("scanning order item: %w", err)
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating order items: %w", err)
+	}
+
+	return items, nil
+}
