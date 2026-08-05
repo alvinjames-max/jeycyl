@@ -31,3 +31,20 @@ func (r *AdminRepository) Create(a *models.Admin) (int64, error) {
 
 	return id, nil
 }
+
+func (r *AdminRepository) GetByUsername(username string) (*models.Admin, error) {
+	var a models.Admin
+	err := r.db.QueryRow(`
+		SELECT id, username, password_hash, created_at
+		FROM admins
+		WHERE username = ?
+	`, username).Scan(&a.ID, &a.Username, &a.PasswordHash, &a.CreatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("getting admin %q: %w", username, err)
+	}
+
+	return &a, nil
+}
