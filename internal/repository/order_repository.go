@@ -100,3 +100,49 @@ func (r *OrderRepository) itemsForOrder(orderID int64) ([]models.OrderItem, erro
 
 	return items, nil
 }
+
+func (r *OrderRepository) ListByCustomer(customerID int64) ([]models.Order, error) {
+	rows, err := r.db.Query(`
+		SELECT id, customer_id, status, delivery_date, delivery_address, notes, total_amount, created_at, updated_at
+		FROM orders
+		WHERE customer_id = ?
+		ORDER BY created_at DESC
+	`, customerID)
+	if err != nil {
+		return nil, fmt.Errorf("listing orders for customer %d: %w", customerID, err)
+	}
+	defer rows.Close()
+
+	var orders []models.Order
+	for rows.Next() {
+		var o models.Order
+		if err := rows.Scan(&o.ID, &o.CustomerID, &o.Status, &o.DeliveryDate, &o.DeliveryAddress, &o.Notes, &o.TotalAmount, &o.CreatedAt, &o.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("scanning order: %w", err)
+		}
+		orders = append(orders, o)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating orders: %w", err)
+	}
+
+	return orders, nil
+}
+
+func (r *OrderRepository) UpdateStatus(id int64, status models.OrderStatus) error {
+	res, err := r.db.Exec(`
+		UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+	`, status, id)
+	if err != nil {
+		return fmt.Errorf("updating order %d status: %w", id, err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("checking rows affected for order %d: %w", id, err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("order %d not found", id)
+	}
+
+	return nil
+}
