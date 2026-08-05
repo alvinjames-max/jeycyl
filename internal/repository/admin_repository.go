@@ -48,3 +48,20 @@ func (r *AdminRepository) GetByUsername(username string) (*models.Admin, error) 
 
 	return &a, nil
 }
+
+func (r *AdminRepository) GetByID(id int64) (*models.Admin, error) {
+	var a models.Admin
+	err := r.db.QueryRow(`
+		SELECT id, username, password_hash, created_at
+		FROM admins
+		WHERE id = ?
+	`, id).Scan(&a.ID, &a.Username, &a.PasswordHash, &a.CreatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("getting admin %d: %w", id, err)
+	}
+
+	return &a, nil
+}
