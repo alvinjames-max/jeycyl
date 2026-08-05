@@ -68,3 +68,30 @@ func (s *PaymentService) RecordPayment(req RecordPaymentRequest) (*models.Paymen
 
 	return payment, nil
 }
+
+func (s *PaymentService) GetPaymentsForOrder(orderID int64) ([]models.Payment, error) {
+	rows, err := s.db.Query(`
+		SELECT id, order_id, amount, method, transaction_ref, status, paid_at, created_at
+		FROM payments
+		WHERE order_id = ?
+		ORDER BY created_at DESC
+	`, orderID)
+	if err != nil {
+		return nil, fmt.Errorf("listing payments for order %d: %w", orderID, err)
+	}
+	defer rows.Close()
+
+	var payments []models.Payment
+	for rows.Next() {
+		var p models.Payment
+		if err := rows.Scan(&p.ID, &p.OrderID, &p.Amount, &p.Method, &p.TransactionRef, &p.Status, &p.PaidAt, &p.CreatedAt); err != nil {
+			return nil, fmt.Errorf("scanning payment: %w", err)
+		}
+		payments = append(payments, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating payments: %w", err)
+	}
+
+	return payments, nil
+}
