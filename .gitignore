@@ -12,8 +12,8 @@ uploads/*
 # Build artifacts
 /bin/
 /dist/
-jeycyl
-server
+/jeycyl
+/server
 
 # Go
 *.test
