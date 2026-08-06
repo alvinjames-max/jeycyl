@@ -2,20 +2,30 @@ package services
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/alvinjames-max/jeycyl/internal/models"
 	"github.com/alvinjames-max/jeycyl/internal/repository"
 )
 
 type OrderService struct {
-	orderRepo *repository.OrderRepository
-	cakeRepo  *repository.CakeRepository
+	orderRepo    *repository.OrderRepository
+	cakeRepo     *repository.CakeRepository
+	customerRepo *repository.CustomerRepository
+	whatsapp     *WhatsAppService
 }
 
-func NewOrderService(orderRepo *repository.OrderRepository, cakeRepo *repository.CakeRepository) *OrderService {
+func NewOrderService(
+	orderRepo *repository.OrderRepository,
+	cakeRepo *repository.CakeRepository,
+	customerRepo *repository.CustomerRepository,
+	whatsapp *WhatsAppService,
+) *OrderService {
 	return &OrderService{
-		orderRepo: orderRepo,
-		cakeRepo:  cakeRepo,
+		orderRepo:    orderRepo,
+		cakeRepo:     cakeRepo,
+		customerRepo: customerRepo,
+		whatsapp:     whatsapp,
 	}
 }
 
@@ -100,7 +110,29 @@ func (s *OrderService) PlaceOrder(req PlaceOrderRequest) (*models.Order, error) 
 	}
 	order.ID = orderID
 
+	s.notifyOrderConfirmed(*order)
+
 	return order, nil
+}
+
+func (s *OrderService) notifyOrderConfirmed(order models.Order) {
+	if s.whatsapp == nil {
+		return
+	}
+
+	customer, err := s.customerRepo.GetByID(order.CustomerID)
+	if err != nil {
+		log.Printf("looking up customer %d for order confirmation: %v", order.CustomerID, err)
+		return
+	}
+	if customer == nil {
+		log.Printf("customer %d not found for order confirmation", order.CustomerID)
+		return
+	}
+
+	if err := s.whatsapp.NotifyOrderConfirmed(*customer, order); err != nil {
+		log.Printf("sending order confirmation for order %d: %v", order.ID, err)
+	}
 }
 
 func (s *OrderService) GetOrder(id int64) (*models.Order, error) {
@@ -126,5 +158,26 @@ func (s *OrderService) UpdateStatus(id int64, status models.OrderStatus) error {
 	if err := s.orderRepo.UpdateStatus(id, status); err != nil {
 		return fmt.Errorf("updating order %d status: %w", id, err)
 	}
+
+	order, err := s.orderRepo.GetByID(id)
+	if err == nil && order != nil {
+		s.notifyStatusChanged(*order)
+	}
+
 	return nil
+}
+
+func (s *OrderService) notifyStatusChanged(order models.Order) {
+	if s.whatsapp == nil {
+		return
+	}
+
+	customer, err := s.customerRepo.GetByID(order.CustomerID)
+	if err != nil || customer == nil {
+		return
+	}
+
+	if err := s.whatsapp.NotifyOrderStatusChanged(*customer, order); err != nil {
+		log.Printf("sending status update for order %d: %v", order.ID, err)
+	}
 }
