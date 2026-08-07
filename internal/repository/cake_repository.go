@@ -116,3 +116,20 @@ func (r *CakeRepository) SetAvailability(id int64, available bool) error {
 	}
 	return nil
 }
+
+func (r *CakeRepository) SetImageURL(id int64, imageURL string) error {
+	res, err := r.db.Exec(`UPDATE cakes SET image_url = ? WHERE id = ?`, imageURL, id)
+	if err != nil {
+		return fmt.Errorf("updating cake %d image: %w", id, err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("checking rows affected for cake %d: %w", id, err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("cake %d not found", id)
+	}
+
+	return nil
+}
