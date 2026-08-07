@@ -17,6 +17,7 @@ func main() {
 	dbPath := getEnv("DB_PATH", "./orders.db")
 	port := getEnv("PORT", "8080")
 	frontendOrigin := getEnv("FRONTEND_ORIGIN", "http://localhost:3000")
+	uploadDir := getEnv("UPLOAD_DIR", "./uploads")
 	whatsappAPIURL := os.Getenv("WHATSAPP_API_URL")
 	whatsappAPIToken := os.Getenv("WHATSAPP_API_TOKEN")
 
@@ -42,7 +43,7 @@ func main() {
 	orderHandler := handlers.NewOrderHandler(orderService)
 	pricingHandler := handlers.NewPricingHandler(cakeRepo)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
-	adminHandler := handlers.NewAdminHandler(cakeRepo, orderService)
+	adminHandler := handlers.NewAdminHandler(cakeRepo, orderService, uploadDir)
 	authHandler := handlers.NewAuthHandler(adminRepo, sessionStore)
 
 	mux := http.NewServeMux()
@@ -69,10 +70,11 @@ func main() {
 	adminMux := http.NewServeMux()
 	adminMux.HandleFunc("POST /admin/cakes", adminHandler.CreateCake)
 	adminMux.HandleFunc("PATCH /admin/cakes/{id}", withID("id", adminHandler.SetCakeAvailability))
+	adminMux.HandleFunc("POST /admin/cakes/{id}/image", withID("id", adminHandler.UploadCakeImage))
 	adminMux.HandleFunc("PATCH /admin/orders/{id}/status", withID("id", adminHandler.UpdateOrderStatus))
 	mux.Handle("/admin/", middleware.RequireAdmin(sessionStore)(adminMux))
 
-	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
+	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadDir))))
 
 	handler := middleware.CORS(frontendOrigin)(mux)
 
