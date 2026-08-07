@@ -45,6 +45,7 @@ func main() {
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 	adminHandler := handlers.NewAdminHandler(cakeRepo, orderService, uploadDir)
 	authHandler := handlers.NewAuthHandler(adminRepo, sessionStore)
+	customerHandler := handlers.NewCustomerHandler(customerRepo)
 
 	mux := http.NewServeMux()
 
@@ -59,6 +60,8 @@ func main() {
 
 	mux.HandleFunc("POST /orders", orderHandler.PlaceOrder)
 	mux.HandleFunc("GET /orders/{id}", withID("id", orderHandler.GetOrder))
+	mux.HandleFunc("POST /customers", customerHandler.CreateCustomer)
+	mux.HandleFunc("GET /customers/{id}", withID("id", customerHandler.GetCustomer))
 	mux.HandleFunc("GET /customers/{id}/orders", withID("id", orderHandler.ListCustomerOrders))
 
 	mux.HandleFunc("POST /payments", paymentHandler.RecordPayment)
