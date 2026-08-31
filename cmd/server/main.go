@@ -18,6 +18,7 @@ func main() {
 	port := getEnv("PORT", "8080")
 	frontendOrigin := getEnv("FRONTEND_ORIGIN", "http://localhost:3000")
 	uploadDir := getEnv("UPLOAD_DIR", "./uploads")
+	sessionSecret := []byte(getEnv("SESSION_SECRET", "jeycyl-cakes-secret-key-change-me"))
 	whatsappAPIURL := os.Getenv("WHATSAPP_API_URL")
 	whatsappAPIToken := os.Getenv("WHATSAPP_API_TOKEN")
 
@@ -37,14 +38,12 @@ func main() {
 	orderService := services.NewOrderService(orderRepo, cakeRepo, customerRepo, whatsappService)
 	paymentService := services.NewPaymentService(db, orderRepo)
 
-	sessionStore := middleware.NewSessionStore()
-
 	homeHandler := handlers.NewHomeHandler(cakeRepo)
 	orderHandler := handlers.NewOrderHandler(orderService)
 	pricingHandler := handlers.NewPricingHandler(cakeRepo)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 	adminHandler := handlers.NewAdminHandler(cakeRepo, orderService, uploadDir)
-	authHandler := handlers.NewAuthHandler(adminRepo, sessionStore)
+	authHandler := handlers.NewAuthHandler(adminRepo, sessionSecret)
 	customerHandler := handlers.NewCustomerHandler(customerRepo)
 
 	mux := http.NewServeMux()
@@ -53,16 +52,16 @@ func main() {
 		w.Write([]byte("ok"))
 	})
 
-	mux.HandleFunc("GET /cakes", homeHandler.ServeCatalog)
-	mux.HandleFunc("GET /cakes/{id}", withID("id", homeHandler.ServeCakeDetail))
+	mux.HandleFunc("GET /cakes", homeHandler.ListCakes)
+	mux.HandleFunc("GET /cakes/{id}", homeHandler.GetCake)
 
 	mux.HandleFunc("POST /pricing/preview", pricingHandler.PreviewPrice)
 
 	mux.HandleFunc("POST /orders", orderHandler.PlaceOrder)
-	mux.HandleFunc("GET /orders/{id}", withID("id", orderHandler.GetOrder))
+	mux.HandleFunc("GET /orders/{id}", orderHandler.GetOrder)
 	mux.HandleFunc("POST /customers", customerHandler.CreateCustomer)
 	mux.HandleFunc("GET /customers/{id}", withID("id", customerHandler.GetCustomer))
-	mux.HandleFunc("GET /customers/{id}/orders", withID("id", orderHandler.ListCustomerOrders))
+	mux.HandleFunc("GET /customers/{customerID}/orders", orderHandler.ListCustomerOrders)
 
 	mux.HandleFunc("POST /payments", paymentHandler.RecordPayment)
 	mux.HandleFunc("GET /orders/{id}/payments", withID("id", paymentHandler.GetPaymentsForOrder))
@@ -71,11 +70,12 @@ func main() {
 	mux.HandleFunc("POST /auth/logout", authHandler.Logout)
 
 	adminMux := http.NewServeMux()
+	adminMux.HandleFunc("GET /admin/orders", adminHandler.ListOrders)
 	adminMux.HandleFunc("POST /admin/cakes", adminHandler.CreateCake)
 	adminMux.HandleFunc("PATCH /admin/cakes/{id}", withID("id", adminHandler.SetCakeAvailability))
 	adminMux.HandleFunc("POST /admin/cakes/{id}/image", withID("id", adminHandler.UploadCakeImage))
 	adminMux.HandleFunc("PATCH /admin/orders/{id}/status", withID("id", adminHandler.UpdateOrderStatus))
-	mux.Handle("/admin/", middleware.RequireAdmin(sessionStore)(adminMux))
+	mux.Handle("/admin/", middleware.RequireAdmin(sessionSecret)(adminMux))
 
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadDir))))
 

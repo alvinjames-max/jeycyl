@@ -102,13 +102,22 @@ func ClearSessionCookie(w http.ResponseWriter) {
 func RequireAuth(secret []byte) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie(sessionCookieName)
-			if err != nil {
+			var token string
+			if cookie, err := r.Cookie(sessionCookieName); err == nil && cookie.Value != "" {
+				token = cookie.Value
+			} else {
+				authHeader := r.Header.Get("Authorization")
+				if strings.HasPrefix(authHeader, "Bearer ") {
+					token = strings.TrimPrefix(authHeader, "Bearer ")
+				}
+			}
+
+			if token == "" {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
 
-			adminID, err := ValidateSessionToken(cookie.Value, secret)
+			adminID, err := ValidateSessionToken(token, secret)
 			if err != nil {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
@@ -118,6 +127,10 @@ func RequireAuth(secret []byte) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+func RequireAdmin(secret []byte) func(http.Handler) http.Handler {
+	return RequireAuth(secret)
 }
 
 func AdminIDFromContext(ctx context.Context) (int64, bool) {

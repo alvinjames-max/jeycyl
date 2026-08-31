@@ -63,7 +63,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	middleware.SetSessionCookie(w, token)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "logged in"})
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "logged in",
+		"token":  token,
+	})
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {

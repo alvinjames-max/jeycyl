@@ -1,0 +1,9 @@
+.git
+.gitignore
+*.db
+*.db-journal
+uploads/
+tmp/
+.env
+.idea/
+.vscode/

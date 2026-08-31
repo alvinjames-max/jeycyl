@@ -146,3 +146,29 @@ func (r *OrderRepository) UpdateStatus(id int64, status models.OrderStatus) erro
 
 	return nil
 }
+
+func (r *OrderRepository) ListAll() ([]models.Order, error) {
+	rows, err := r.db.Query(`
+		SELECT id, customer_id, status, delivery_date, delivery_address, notes, total_amount, created_at, updated_at
+		FROM orders
+		ORDER BY created_at DESC
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("listing all orders: %w", err)
+	}
+	defer rows.Close()
+
+	var orders []models.Order
+	for rows.Next() {
+		var o models.Order
+		if err := rows.Scan(&o.ID, &o.CustomerID, &o.Status, &o.DeliveryDate, &o.DeliveryAddress, &o.Notes, &o.TotalAmount, &o.CreatedAt, &o.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("scanning order: %w", err)
+		}
+		orders = append(orders, o)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating orders: %w", err)
+	}
+
+	return orders, nil
+}

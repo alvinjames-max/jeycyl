@@ -181,3 +181,7 @@ func (s *OrderService) notifyStatusChanged(order models.Order) {
 		log.Printf("sending status update for order %d: %v", order.ID, err)
 	}
 }
+
+func (s *OrderService) ListAllOrders() ([]models.Order, error) {
+	return s.orderRepo.ListAll()
+}

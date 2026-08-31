@@ -7,7 +7,7 @@ import (
 	_ "embed"
 	"fmt"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 // schemaSQL is embedded at build time so the binary doesn't depend on the
@@ -19,7 +19,7 @@ var schemaSQL string
 // New opens a SQLite database at the given path, enables foreign key
 // enforcement (off by default in SQLite), and applies the schema.
 func New(dbPath string) (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", dbPath+"?_foreign_keys=on")
+	db, err := sql.Open("sqlite", dbPath+"?_pragma=foreign_keys(1)")
 	if err != nil {
 		return nil, fmt.Errorf("opening database: %w", err)
 	}

@@ -211,6 +211,25 @@ func (h *AdminHandler) UploadCakeImage(w http.ResponseWriter, r *http.Request, c
 	}
 }
 
+func (h *AdminHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	orders, err := h.orderService.ListAllOrders()
+	if err != nil {
+		log.Printf("listing all orders for admin: %v", err)
+		http.Error(w, "failed to list orders", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(orders); err != nil {
+		log.Printf("encoding orders response: %v", err)
+	}
+}
+
 func randomFilename(ext string) (string, error) {
 	b := make([]byte, 16)
 	if _, err := rand.Read(b); err != nil {
