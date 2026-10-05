@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keepsafe Web - 3 Starter Template Switcher & Comparison</title>
+  <meta name="description" content="Compare 3 starter web app templates for Keepsafe: Minimal & Clean, Command Center Dashboard, and Bold & Modern Hero.">
+  <link rel="stylesheet" href="shared/shared.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .switcher-header {
+      padding: 3rem 2rem 2rem 2rem;
+      text-align: center;
+      background: radial-gradient(circle at top center, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid #334155;
+    }
+    .switcher-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .switcher-subtitle {
+      color: #94a3b8;
+      font-size: 1.1rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .templates-grid {
+      max-width: 1280px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+    .template-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .template-card:hover {
+      transform: translateY(-6px);
+      border-color: #38bdf8;
+      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.4);
+    }
+    .preview-header {
+      height: 160px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .card-body {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .launch-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-decoration: none;
+      color: white;
+      margin-top: auto;
+      transition: opacity 0.2s ease;
+    }
+    .launch-btn:hover {
+      opacity: 0.9;
+    }
+    .feature-list {
+      list-style: none;
+      margin: 1rem 0 1.5rem 0;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .feature-list li::before {
+      content: "✓ ";
+      color: #10b981;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Kenyan Flag Brand Strip -->
+  <div class="kenyan-flag-strip"></div>
+
+  <!-- Switcher Header -->
+  <header class="switcher-header">
+    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(5, 150, 105, 0.15); color: #10b981; padding: 4px 14px; border-radius: 9999px; font-weight: 600; font-size: 0.85rem; margin-bottom: 1rem; border: 1px solid rgba(16, 185, 129, 0.3);">
+      🛡️ KEEPSAFE WEB STARTER TEMPLATES
+    </div>
+    <h1 class="switcher-title">Compare & Pick Your Design Architecture</h1>
+    <p class="switcher-subtitle">
+      Three distinct starter templates built on shared logic, mock Kenyan transit data, real-time geofence radars, and one-tap emergency SOS dispatch.
+    </p>
+  </header>
+
+  <!-- Templates Grid -->
+  <main class="templates-grid">
+    
+    <!-- Template A Card -->
+    <div class="template-card">
+      <div class="preview-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 2px solid #059669;">
+        <span class="badge badge-low" style="align-self: flex-start;">TEMPLATE A</span>
+        <div>
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: white;">Minimal & Clean</h2>
+          <div style="font-size: 0.85rem; color: #a7f3d0;">Calm, civic & trustworthy design</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5;">
+          Top navbar with centered 1200px layout. Clean slate cards, high readability typography, subtle floating SOS pill button, and calm emerald accents.
+        </p>
+        <ul class="feature-list">
+          <li>Top header tabs & clean max-width container</li>
+          <li>Calm Civic Emerald & Slate palette</li>
+          <li>Floating emergency SOS action pill</li>
+          <li>Split map & incident feed layout</li>
+        </ul>
+        <a href="template-a/index.html" class="launch-btn" style="background: #059669;">
+          🚀 Launch Template A →
+        </a>
+      </div>
+    </div>
+
+    <!-- Template B Card -->
+    <div class="template-card">
+      <div class="preview-header" style="background: linear-gradient(135deg, #090d16 0%, #0f172a 100%); border-bottom: 2px solid #38bdf8;">
+        <span class="badge badge-medium" style="align-self: flex-start; background: #0284c7; color: white; border: none;">TEMPLATE B</span>
+        <div>
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: white;">Command Center Dashboard</h2>
+          <div style="font-size: 0.85rem; color: #38bdf8;">Data-dense, map-centered command UI</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5;">
+          Dark mode dashboard layout with a collapsible left navigation sidebar, full-height live map canvas, right-hand live alerts drawer, and persistent SOS widget.
+        </p>
+        <ul class="feature-list">
+          <li>Fixed left sidebar navigation & telemetry status</li>
+          <li>Full-height interactive live radar canvas</li>
+          <li>Right panel real-time incident cards drawer</li>
+          <li>Sidebar persistent pulse SOS widget</li>
+        </ul>
+        <a href="template-b/index.html" class="launch-btn" style="background: #0284c7;">
+          🚀 Launch Template B →
+        </a>
+      </div>
+    </div>
+
+    <!-- Template C Card -->
+    <div class="template-card">
+      <div class="preview-header" style="background: linear-gradient(135deg, #3b0764 0%, #0f051d 100%); border-bottom: 2px solid #ef4444;">
+        <span class="badge badge-critical" style="align-self: flex-start;">TEMPLATE C</span>
+        <div>
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: white;">Bold & Modern Hero</h2>
+          <div style="font-size: 0.85rem; color: #f97316;">Hero-led, high visual emergency priority</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5;">
+          High-impact obsidian dark theme with a live danger ticker, massive pulse-animated hero SOS emergency button, and vibrant card grids.
+        </p>
+        <ul class="feature-list">
+          <li>Live danger alert ticker header</li>
+          <li>Giant pulsing hero emergency SOS trigger</li>
+          <li>Vivid obsidian, crimson & coral gradient UI</li>
+          <li>Large visual cards with hover depth</li>
+        </ul>
+        <a href="template-c/index.html" class="launch-btn" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+          🚀 Launch Template C →
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="text-align: center; padding: 2rem; border-top: 1px solid #334155; color: #64748b; font-size: 0.85rem; margin-top: auto;">
+    Keepsafe Web Starter Suite • Kenya Commuter Safety Platform • Shared Logic Architecture
+  </footer>
+
+</body>
+</html>

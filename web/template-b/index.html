@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keepsafe - Command Center Dashboard (Template B)</title>
+  <meta name="description" content="Dashboard style map-centered commuter safety platform for Kenyan transit corridors.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Dashboard Container Shell -->
+  <div class="dashboard-container">
+    
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon" style="background: #0284c7;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="sidebar-brand">Keepsafe</div>
+          <div style="font-size: 0.7rem; color: #38bdf8; font-weight: bold;">COMMAND DASHBOARD</div>
+        </div>
+      </div>
+
+      <!-- Emergency SOS Widget -->
+      <div class="sidebar-sos-widget pulse-sos" id="btn-sidebar-sos">
+        <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.9;">EMERGENCY COMMAND</div>
+        <div style="font-size: 1.1rem; font-weight: 800; margin-top: 2px;">🚨 SOS DISPATCH</div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <ul class="sidebar-menu">
+        <li><button class="sidebar-btn active" id="side-tab-map">🖥️ Live Map Radar</button></li>
+        <li><button class="sidebar-btn" id="side-tab-report">➕ Report Incident</button></li>
+        <li><button class="sidebar-btn" id="side-tab-geofences">🛡️ Geofence Zones</button></li>
+        <li style="margin-top: auto;"><button class="sidebar-btn" onclick="window.location.href='../index.html'" style="color: #38bdf8;">🔄 Switch Template</button></li>
+      </ul>
+
+      <!-- Footer Quick Status -->
+      <div style="padding-top: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.75rem; color: var(--text-muted);">
+        <div>Active Geofences: <strong style="color: #10b981;">4 Zones</strong></div>
+        <div>System Status: <strong style="color: #38bdf8;">Online 99.9%</strong></div>
+      </div>
+    </aside>
+
+    <!-- Central Workspace (Map & Controls) -->
+    <main class="workspace" id="workspace-main">
+      <!-- Injected by app.js -->
+    </main>
+
+    <!-- Right Side Panel (Live Alerts Stream) -->
+    <aside class="side-panel" id="side-panel-right">
+      <!-- Injected by app.js -->
+    </aside>
+  </div>
+
+  <!-- Dynamic Modal Root -->
+  <div id="modal-root"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
