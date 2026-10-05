@@ -19,27 +19,27 @@ Keepsafe is a community-driven safety platform for Kenyan commuters, designed to
 ---
 
 ## 🛠 Project Structure
-- `/web/shared`: Shared API client mock, TypeScript interfaces, Kenyan routes & incident mock data, helper utilities, state hooks.
+- `/web/shared`: Shared API client mock, TypeScript/JS interfaces, Kenyan routes & incident mock data, helper utilities, state hooks.
 - `/web/template-a`: Minimal & Clean template (Top navbar, centered content, calm & trustworthy feel).
 - `/web/template-b`: Dashboard style template (Left sidebar navigation, central interactive map, live side panel feed).
 - `/web/template-c`: Bold & Modern template (Hero-led landing, large visual cards, high-impact SOS focus).
-- `/web/src`: Root switcher page for comparing all 3 templates.
+- `/web/index.html`: Root switcher page for comparing all 3 templates.
 - `/web/README.md`: Guide on running and comparing templates.
 
 ---
 
 ## 📋 Task Checklist
 - [x] **Step 1**: Analyze mobile app & document in `/web/PROGRESS.md`
-- [ ] **Step 2**: Propose 3 template concepts & shared screen list (Awaiting User Approval)
-- [ ] **Step 3**: Build `/web/shared` module (types, mock data, api, state)
-- [ ] **Step 4a**: Build Template A (Minimal & Clean)
-- [ ] **Step 4b**: Build Template B (Dashboard & Map Centered)
-- [ ] **Step 4c**: Build Template C (Bold & Hero SOS Centered)
-- [ ] **Step 5**: Build Root Switcher Page & README
-- [ ] **Step 6**: Final Verification & Git Commit
+- [x] **Step 2**: Propose 3 template concepts & shared screen list (Approved by User)
+- [x] **Step 3**: Build `/web/shared` module (types, mock data, api, state, map component)
+- [x] **Step 4a**: Build Template A (Minimal & Clean)
+- [x] **Step 4b**: Build Template B (Dashboard & Map Centered)
+- [x] **Step 4c**: Build Template C (Bold & Hero SOS Centered)
+- [x] **Step 5**: Build Root Switcher Page (`/web/index.html`) & README (`/web/README.md`)
+- [x] **Step 6**: Final Verification & Git Commit
 
 ---
 
 ## Current Status
-**Status**: Step 1 Complete | Step 2 Proposal Submitted for User Approval
-**Next Step**: Wait for user approval on Template concepts and shared screens before building `/web/shared`.
+**Status**: COMPLETE (All 3 templates, shared logic layer, switcher page, and documentation implemented and committed).
+**Next Step**: Complete.
