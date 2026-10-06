@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBEEF2"/>
+      <stop offset="100%" stop-color="#F2D1DC"/>
+    </linearGradient>
+    <radialGradient id="frost" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C9A227" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#C9A227" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="450" fill="url(#bg)"/>
+  <circle cx="300" cy="225" r="140" fill="url(#frost)"/>
+  <circle cx="300" cy="225" r="85" fill="#3D1436" opacity="0.08"/>
+  
+  <!-- Cake Base -->
+  <rect x="200" y="240" width="200" height="70" rx="16" fill="#3D1436" opacity="0.85"/>
+  <!-- Middle Tier -->
+  <rect x="225" y="185" width="150" height="58" rx="12" fill="#5A2350"/>
+  <!-- Top Tier -->
+  <rect x="250" y="140" width="100" height="48" rx="10" fill="#7C9473"/>
+  <!-- Frosting Piping Highlights -->
+  <ellipse cx="300" cy="185" rx="75" ry="10" fill="#FBEEF2" opacity="0.9"/>
+  <ellipse cx="300" cy="240" rx="100" ry="12" fill="#FBEEF2" opacity="0.9"/>
+  <!-- Candles & Flame -->
+  <rect x="296" y="112" width="8" height="28" rx="3" fill="#C9A227"/>
+  <circle cx="300" cy="104" r="6" fill="#C9A227"/>
+  <path d="M300,94 C304,101 303,105 300,105 C297,105 296,101 300,94 Z" fill="#E67E22"/>
+  
+  <!-- Text Label -->
+  <text x="300" y="360" font-family="Georgia, serif" font-size="20" font-weight="bold" fill="#3D1436" text-anchor="middle" letter-spacing="2">
+    JEYCYL ARTISAN CAKES
+  </text>
+  <text x="300" y="385" font-family="sans-serif" font-size="12" font-weight="600" fill="#C9A227" text-anchor="middle" letter-spacing="3">
+    HANDCRAFTED IN NAIROBI
+  </text>
+</svg>
