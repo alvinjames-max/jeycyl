@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --color-plum: #3D1436;
+  --color-plum-dark: #2A0D25;
+  --color-plum-light: #5A2350;
+  --color-plum-muted: rgba(61, 20, 54, 0.08);
+
+  --color-blush: #FBEEF2;
+  --color-blush-card: #FFFFFF;
+  --color-blush-soft: #FFF7F9;
+  --color-blush-border: #F3D3DC;
+
+  --color-gold: #C9A227;
+  --color-gold-hover: #B58F20;
+  --color-gold-light: #FDF8E7;
+
+  --color-sage: #7C9473;
+  --color-sage-light: #EFF4EE;
+  --color-sage-dark: #586E52;
+
+  --font-serif: var(--font-fraunces), "Fraunces", Georgia, serif;
+  --font-sans: var(--font-work-sans), "Work Sans", system-ui, sans-serif;
+}
+
+:root {
+  --background: #FBEEF2;
+  --foreground: #3D1436;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-serif);
+  color: #3D1436;
+}
+
+/* Piped frosting scallop edge styling */
+.frosting-scallop-bottom {
+  background-image: radial-gradient(circle at 12px 0px, transparent 10px, currentColor 10.5px);
+  background-size: 24px 12px;
+  background-repeat: repeat-x;
+  height: 12px;
+}
+
+.frosting-scallop-top {
+  background-image: radial-gradient(circle at 12px 12px, transparent 10px, currentColor 10.5px);
+  background-size: 24px 12px;
+  background-repeat: repeat-x;
+  height: 12px;
+}
+
+/* Wavy frosting piped border component utility */
+.piped-card {
+  position: relative;
+  background: #FFFFFF;
+  border: 1px solid #F0D5DD;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 25px -6px rgba(61, 20, 54, 0.06), 0 4px 10px -2px rgba(61, 20, 54, 0.03);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.piped-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 30px -8px rgba(61, 20, 54, 0.12), 0 8px 16px -4px rgba(61, 20, 54, 0.06);
+  border-color: rgba(201, 162, 39, 0.4);
+}
+
+/* Scalloped badge / tag */
+.badge-sage {
+  background-color: #EFF4EE;
+  color: #586E52;
+  border: 1px solid rgba(124, 148, 115, 0.3);
+}
+
+/* Gold CTA button styling */
+.btn-gold {
+  background-color: #C9A227;
+  color: #FFFFFF;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(201, 162, 39, 0.25);
+}
+
+.btn-gold:hover {
+  background-color: #B58F20;
+  box-shadow: 0 6px 16px rgba(201, 162, 39, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+.btn-plum {
+  background-color: #3D1436;
+  color: #FFFFFF;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-plum:hover {
+  background-color: #2A0D25;
+}
