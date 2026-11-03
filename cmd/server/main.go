@@ -16,7 +16,7 @@ import (
 func main() {
 	dbPath := getEnv("DB_PATH", "./orders.db")
 	port := getEnv("PORT", "8080")
-	frontendOrigin := getEnv("FRONTEND_ORIGIN", "http://localhost:3000")
+	frontendOrigin := getEnv("FRONTEND_ORIGIN", "http://localhost:8080")
 	uploadDir := getEnv("UPLOAD_DIR", "./uploads")
 	sessionSecret := []byte(getEnv("SESSION_SECRET", "jeycyl-cakes-secret-key-change-me"))
 	whatsappAPIURL := os.Getenv("WHATSAPP_API_URL")
@@ -69,15 +69,24 @@ func main() {
 	mux.HandleFunc("POST /auth/login", authHandler.Login)
 	mux.HandleFunc("POST /auth/logout", authHandler.Logout)
 
-	adminMux := http.NewServeMux()
-	adminMux.HandleFunc("GET /admin/orders", adminHandler.ListOrders)
-	adminMux.HandleFunc("POST /admin/cakes", adminHandler.CreateCake)
-	adminMux.HandleFunc("PATCH /admin/cakes/{id}", withID("id", adminHandler.SetCakeAvailability))
-	adminMux.HandleFunc("POST /admin/cakes/{id}/image", withID("id", adminHandler.UploadCakeImage))
-	adminMux.HandleFunc("PATCH /admin/orders/{id}/status", withID("id", adminHandler.UpdateOrderStatus))
-	mux.Handle("/admin/", middleware.RequireAdmin(sessionSecret)(adminMux))
+	requireAdmin := middleware.RequireAdmin(sessionSecret)
+	mux.Handle("GET /admin/orders", requireAdmin(http.HandlerFunc(adminHandler.ListOrders)))
+	mux.Handle("POST /admin/cakes", requireAdmin(http.HandlerFunc(adminHandler.CreateCake)))
+	mux.HandleFunc("PATCH /admin/cakes/{id}", func(w http.ResponseWriter, r *http.Request) {
+		requireAdmin(withID("id", adminHandler.SetCakeAvailability)).ServeHTTP(w, r)
+	})
+	mux.HandleFunc("POST /admin/cakes/{id}/image", func(w http.ResponseWriter, r *http.Request) {
+		requireAdmin(withID("id", adminHandler.UploadCakeImage)).ServeHTTP(w, r)
+	})
+	mux.HandleFunc("PATCH /admin/orders/{id}/status", func(w http.ResponseWriter, r *http.Request) {
+		requireAdmin(withID("id", adminHandler.UpdateOrderStatus)).ServeHTTP(w, r)
+	})
 
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadDir))))
+
+	// Serve the frontend SPA from ./web/
+	webDir := getEnv("WEB_DIR", "./web")
+	mux.Handle("/", http.FileServer(http.Dir(webDir)))
 
 	handler := middleware.CORS(frontendOrigin)(mux)
 

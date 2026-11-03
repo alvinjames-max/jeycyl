@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — Jeycyl Cakes</title>
+  <meta name="description" content="Complete your Jeycyl Cakes order. Enter your details and place your cake order for delivery." />
+  <link rel="stylesheet" href="./shared/style.css" />
+  <style>
+    .checkout-layout { display: grid; grid-template-columns: 1fr 400px; gap: 2.5rem; padding: 3rem 0; align-items: start; }
+    .checkout-card { background: var(--white); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+    .checkout-card h2 { font-size: 1.35rem; margin-bottom: 1.5rem; padding-bottom: .75rem; border-bottom: 1px solid var(--cream-dark); }
+    .step-tabs { display: flex; gap: 0; margin-bottom: 2rem; border-radius: var(--radius-md); overflow: hidden; border: 1.5px solid var(--cream-dark); }
+    .step-tab { flex: 1; text-align: center; padding: .75rem; font-size: .85rem; font-weight: 600; cursor: pointer; background: var(--cream); color: var(--text-muted); transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: .4rem; }
+    .step-tab.active { background: var(--gold); color: var(--brown-950); }
+    .step-tab.done   { background: var(--brown-900); color: var(--cream); }
+
+    /* Order items in summary */
+    .order-line { display: flex; justify-content: space-between; align-items: center; padding: .6rem 0; border-bottom: 1px solid var(--cream); font-size: .9rem; }
+    .order-line:last-of-type { border-bottom: none; }
+    .order-line .item-name { font-weight: 500; }
+    .order-line .item-sub  { font-size: .78rem; color: var(--text-muted); }
+
+    /* Payment methods */
+    .payment-options { display: flex; flex-direction: column; gap: .75rem; }
+    .payment-option { display: flex; align-items: center; gap: .75rem; padding: 1rem; border: 1.5px solid var(--cream-dark); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
+    .payment-option:hover, .payment-option.selected { border-color: var(--gold); background: rgba(212,168,67,.05); }
+    .payment-option input[type=radio] { accent-color: var(--gold); width: 18px; height: 18px; }
+    .payment-option .method-icon { font-size: 1.4rem; }
+    .payment-option .method-label { font-weight: 600; font-size: .9rem; }
+    .payment-option .method-sub   { font-size: .78rem; color: var(--text-muted); }
+
+    /* Confirmation screen */
+    #confirmation-screen { display: none; text-align: center; padding: 2rem 0; }
+    #confirmation-screen .check-circle { width: 80px; height: 80px; border-radius: 50%; background: #e8fdf0; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem; }
+    #confirmation-screen h2 { margin-bottom: .75rem; }
+    #confirmation-screen p  { color: var(--text-muted); margin-bottom: .5rem; }
+    .order-id-box { background: var(--cream); border-radius: var(--radius-md); padding: 1rem 1.5rem; display: inline-block; margin: 1rem 0; font-family: monospace; font-size: 1.1rem; font-weight: 700; letter-spacing: .1em; color: var(--brown-700); }
+
+    @media (max-width: 900px) { .checkout-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="./index.html" class="nav-logo">Jeycyl<span>Cakes</span></a>
+    <ul class="nav-links">
+      <li><a href="./index.html">Home</a></li>
+      <li><a href="./menu.html">Menu</a></li>
+      <li><a href="./track.html">Track Order</a></li>
+    </ul>
+    <button class="nav-cart-badge" id="cart-btn" aria-label="Open cart">
+      🛒<span class="nav-cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="container">
+    <p class="section-eyebrow">Almost there!</p>
+    <h1>Checkout</h1>
+    <p>Fill in your details and confirm your order.</p>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="checkout-layout">
+
+      <!-- Left: Forms -->
+      <div>
+        <!-- Step tabs -->
+        <div class="step-tabs" id="step-tabs">
+          <div class="step-tab active" data-step="1">① Your Details</div>
+          <div class="step-tab" data-step="2">② Delivery</div>
+          <div class="step-tab" data-step="3">③ Payment</div>
+        </div>
+
+        <!-- Step 1: Customer Info -->
+        <div id="step-1" class="checkout-card">
+          <h2>Your Details</h2>
+          <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:1.25rem">Already ordered before? Enter your Customer ID to skip this step.</p>
+          <div class="form-group">
+            <label class="form-label" for="existing-id">Existing Customer ID (optional)</label>
+            <div style="display:flex;gap:.75rem">
+              <input type="number" class="form-control" id="existing-id" placeholder="e.g. 12">
+              <button class="btn btn-outline" id="lookup-customer-btn">Lookup</button>
+            </div>
+          </div>
+          <div style="text-align:center;color:var(--text-muted);font-size:.85rem;margin:1rem 0">— or fill in your details —</div>
+          <div class="form-group">
+            <label class="form-label" for="cust-name">Full Name *</label>
+            <input type="text" class="form-control" id="cust-name" placeholder="Jane Doe">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cust-phone">Phone Number *</label>
+            <input type="tel" class="form-control" id="cust-phone" placeholder="+254 7XX XXX XXX">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cust-email">Email (optional)</label>
+            <input type="email" class="form-control" id="cust-email" placeholder="jane@email.com">
+          </div>
+          <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:.5rem" id="next-step-1">Continue →</button>
+        </div>
+
+        <!-- Step 2: Delivery -->
+        <div id="step-2" class="checkout-card" style="display:none">
+          <h2>Delivery Details</h2>
+          <div class="form-group">
+            <label class="form-label" for="delivery-address">Delivery Address *</label>
+            <textarea class="form-control" id="delivery-address" rows="3" placeholder="Street, Estate, City…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="order-notes">Special Instructions (optional)</label>
+            <textarea class="form-control" id="order-notes" rows="3" placeholder="Custom message on cake, dietary needs…"></textarea>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:.5rem">
+            <button class="btn btn-ghost btn-lg" id="back-step-1">← Back</button>
+            <button class="btn btn-primary btn-lg" style="flex:1;justify-content:center" id="next-step-2">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Payment -->
+        <div id="step-3" class="checkout-card" style="display:none">
+          <h2>Payment Method</h2>
+          <div class="payment-options">
+            <label class="payment-option selected" id="pay-mpesa">
+              <input type="radio" name="payment" value="mpesa" checked>
+              <span class="method-icon">📱</span>
+              <div><div class="method-label">M-Pesa</div><div class="method-sub">Pay via Safaricom M-Pesa STK push</div></div>
+            </label>
+            <label class="payment-option" id="pay-cash">
+              <input type="radio" name="payment" value="cash">
+              <span class="method-icon">💵</span>
+              <div><div class="method-label">Cash on Delivery</div><div class="method-sub">Pay when you receive your order</div></div>
+            </label>
+            <label class="payment-option" id="pay-card">
+              <input type="radio" name="payment" value="card">
+              <span class="method-icon">💳</span>
+              <div><div class="method-label">Card</div><div class="method-sub">Visa / Mastercard</div></div>
+            </label>
+          </div>
+
+          <div id="mpesa-field" style="margin-top:1.25rem">
+            <div class="form-group">
+              <label class="form-label" for="mpesa-ref">M-Pesa Transaction Ref (after payment)</label>
+              <input type="text" class="form-control" id="mpesa-ref" placeholder="e.g. QJX2Y3Z4OP">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:1rem;margin-top:1.5rem">
+            <button class="btn btn-ghost btn-lg" id="back-step-2">← Back</button>
+            <button class="btn btn-primary btn-lg" style="flex:1;justify-content:center" id="place-order-btn">
+              Place Order 🎂
+            </button>
+          </div>
+        </div>
+
+        <!-- Confirmation -->
+        <div id="confirmation-screen" class="checkout-card">
+          <div class="check-circle">🎉</div>
+          <h2>Order Placed!</h2>
+          <p>Thank you! Your cake order has been received.</p>
+          <p style="margin-bottom:0">Your Order ID:</p>
+          <div class="order-id-box" id="conf-order-id">#—</div>
+          <p style="margin-top:1rem">We'll send you a WhatsApp update shortly.<br>Use your Order ID to track your delivery.</p>
+          <div style="display:flex;gap:1rem;justify-content:center;margin-top:2rem;flex-wrap:wrap">
+            <a href="#" id="conf-track-link" class="btn btn-primary">Track My Order →</a>
+            <a href="./menu.html" class="btn btn-outline">Order More Cakes</a>
+          </div>
+          <div style="margin-top:1.5rem">
+            <a href="#" id="conf-whatsapp-link" target="_blank" class="btn btn-ghost" style="color:#25D366;font-size:.9rem">
+              💬 Share on WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Order Summary -->
+      <aside>
+        <div class="checkout-card" style="position:sticky;top:88px">
+          <h2>Order Summary</h2>
+          <div id="summary-items">
+            <p style="color:var(--text-muted);font-size:.9rem;text-align:center;padding:1.5rem">Your cart is empty.<br><a href="./menu.html" style="color:var(--gold)">Browse menu →</a></p>
+          </div>
+          <div style="border-top:2px solid var(--cream-dark);padding-top:1rem;margin-top:1rem;display:flex;justify-content:space-between;align-items:center">
+            <strong>Total</strong>
+            <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--brown-700)" id="summary-total">KES 0</span>
+          </div>
+          <div style="margin-top:1rem;font-size:.78rem;color:var(--text-muted);background:var(--cream);border-radius:var(--radius-sm);padding:.75rem">
+            🚐 Delivery fee calculated at time of confirmation.
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<div class="toast-container" id="toast-container"></div>
+
+<footer class="footer" style="margin-top:4rem">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="nav-logo" style="margin-bottom:1rem">Jeycyl<span style="color:rgba(247,241,232,.6)">Cakes</span></div>
+        <p>Premium artisan cakes handcrafted in Nairobi with love and the finest ingredients.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./menu.html">Our Menu</a></li>
+          <li><a href="./order.html">Place Order</a></li>
+          <li><a href="./track.html">Track Order</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:+254700000000">📞 +254 700 000 000</a></li>
+          <li><a href="mailto:hello@jeycylcakes.com">📧 hello@jeycylcakes.com</a></li>
+          <li><a href="#">📍 Nairobi, Kenya</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Hours</h4>
+        <ul>
+          <li><a href="#">Mon–Fri: 8am – 8pm</a></li>
+          <li><a href="#">Sat: 8am – 10pm</a></li>
+          <li><a href="#">Sun: 10am – 6pm</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Jeycyl Cakes. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+import { createCustomer, getCustomer, placeOrder, recordPayment } from './shared/api.js';
+import { getCart, cartTotal, cartCount, toOrderItems, clearCart } from './shared/cart.js';
+
+/* ── Toast ── */
+function showToast(msg, type = 'info') {
+  const tc = document.getElementById('toast-container');
+  const t  = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span><span>${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 4000);
+}
+
+/* ── Summary ── */
+function renderSummary() {
+  const cart = getCart();
+  document.getElementById('cart-count').textContent = cartCount(cart);
+  const items = document.getElementById('summary-items');
+  if (!cart.length) {
+    items.innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;text-align:center;padding:1.5rem">Your cart is empty.<br><a href="./menu.html" style="color:var(--gold)">Browse menu →</a></p>';
+    document.getElementById('summary-total').textContent = 'KES 0';
+    return;
+  }
+  items.innerHTML = cart.map(item => `
+    <div class="order-line">
+      <div>
+        <div class="item-name">${item.name} × ${item.quantity}</div>
+        ${item.variantLabel ? `<div class="item-sub">${item.variantLabel}</div>` : ''}
+      </div>
+      <div>KES ${(item.unitPrice * item.quantity).toLocaleString()}</div>
+    </div>
+  `).join('');
+  document.getElementById('summary-total').textContent = `KES ${cartTotal(cart).toLocaleString()}`;
+}
+
+/* ── Steps ── */
+let currentStep = 1;
+let customerId  = null;
+
+function showStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById(`step-${i}`).style.display = i === n ? 'block' : 'none';
+  });
+  document.querySelectorAll('.step-tab').forEach(t => {
+    const s = +t.dataset.step;
+    t.classList.toggle('active', s === n);
+    t.classList.toggle('done', s < n);
+  });
+  currentStep = n;
+}
+
+document.getElementById('next-step-1').addEventListener('click', async () => {
+  const existingId = document.getElementById('existing-id').value.trim();
+  if (existingId) {
+    try {
+      const c = await getCustomer(+existingId);
+      customerId = c.id;
+      showToast(`Welcome back, ${c.name}!`, 'success');
+      showStep(2);
+    } catch { showToast('Customer not found. Please fill your details.', 'error'); }
+    return;
+  }
+  const name  = document.getElementById('cust-name').value.trim();
+  const phone = document.getElementById('cust-phone').value.trim();
+  if (!name || !phone) { showToast('Name and phone are required.', 'error'); return; }
+  try {
+    const c = await createCustomer({
+      name, phone, email: document.getElementById('cust-email').value.trim() || undefined,
+    });
+    customerId = c.id;
+    showToast('Details saved!', 'success');
+    showStep(2);
+  } catch (e) { showToast(`Failed: ${e.message}`, 'error'); }
+});
+
+document.getElementById('lookup-customer-btn').addEventListener('click', async () => {
+  const id = document.getElementById('existing-id').value.trim();
+  if (!id) return;
+  try {
+    const c = await getCustomer(+id);
+    document.getElementById('cust-name').value  = c.name;
+    document.getElementById('cust-phone').value = c.phone;
+    if (c.email) document.getElementById('cust-email').value = c.email;
+    showToast(`Found: ${c.name}`, 'success');
+  } catch { showToast('Customer not found.', 'error'); }
+});
+
+document.getElementById('back-step-1').addEventListener('click', () => showStep(1));
+document.getElementById('next-step-2').addEventListener('click', () => {
+  const addr = document.getElementById('delivery-address').value.trim();
+  if (!addr) { showToast('Please enter a delivery address.', 'error'); return; }
+  showStep(3);
+});
+document.getElementById('back-step-2').addEventListener('click', () => showStep(2));
+
+/* ── Payment option highlight ── */
+document.querySelectorAll('.payment-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    document.getElementById('mpesa-field').style.display = opt.querySelector('input').value === 'mpesa' ? 'block' : 'none';
+  });
+});
+
+/* ── Place order ── */
+document.getElementById('place-order-btn').addEventListener('click', async () => {
+  const cart = getCart();
+  if (!cart.length) { showToast('Your cart is empty!', 'error'); return; }
+  if (!customerId) { showToast('No customer ID. Go back to step 1.', 'error'); return; }
+
+  const btn = document.getElementById('place-order-btn');
+  btn.disabled = true; btn.textContent = 'Placing order…';
+
+  const paymentMethod = document.querySelector('input[name=payment]:checked').value;
+  const mpesaRef      = document.getElementById('mpesa-ref').value.trim();
+  const notes         = document.getElementById('order-notes').value.trim();
+  const address       = document.getElementById('delivery-address').value.trim();
+
+  try {
+    const order = await placeOrder({
+      customer_id:      customerId,
+      delivery_address: address,
+      notes:            notes || undefined,
+      items:            toOrderItems(cart),
+    });
+
+    // Record payment
+    try {
+      await recordPayment({
+        order_id:        order.id,
+        amount:          order.total_amount,
+        method:          paymentMethod,
+        transaction_ref: mpesaRef || undefined,
+        status:          paymentMethod === 'mpesa' && mpesaRef ? 'completed' : 'pending',
+      });
+    } catch { /* non-fatal */ }
+
+    clearCart();
+    const orderId = order.id;
+    document.getElementById('conf-order-id').textContent = `#${orderId}`;
+    // Set track link with order id pre-filled
+    const trackLink = document.getElementById('conf-track-link');
+    if (trackLink) trackLink.href = `./track.html?order=${orderId}`;
+    // WhatsApp link
+    const waLink = document.getElementById('conf-whatsapp-link');
+    if (waLink) {
+      const msg = encodeURIComponent(`Hi Jeycyl Cakes! I placed an order and my Order ID is #${orderId}. Please confirm.`);
+      waLink.href = `https://wa.me/254700000000?text=${msg}`;
+    }
+    [1,2,3].forEach(i => document.getElementById(`step-${i}`).style.display = 'none');
+    document.getElementById('step-tabs').style.display = 'none';
+    document.getElementById('confirmation-screen').style.display = 'block';
+    renderSummary();
+  } catch (e) {
+    showToast(`Order failed: ${e.message}`, 'error');
+    btn.disabled = false; btn.textContent = 'Place Order 🎂';
+  }
+});
+
+renderSummary();
+window.addEventListener('cart:updated', renderSummary);
+</script>
+</body>
+</html>

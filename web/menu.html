@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Menu — Jeycyl Cakes</title>
+  <meta name="description" content="Browse all Jeycyl Cakes varieties — from rich chocolate to fruity delights. Pick your size, flavour, and add to cart." />
+  <link rel="stylesheet" href="./shared/style.css" />
+  <style>
+    .category-chips {
+      display: flex; gap: .625rem; flex-wrap: wrap;
+      padding: 1.5rem 0 0;
+    }
+    .chip {
+      padding: .45rem 1.1rem;
+      border-radius: 100px;
+      border: 1.5px solid var(--cream-dark);
+      background: var(--white);
+      color: var(--text-muted);
+      font-size: .82rem; font-weight: 600;
+      cursor: pointer; transition: var(--transition);
+      white-space: nowrap;
+    }
+    .chip:hover { border-color: var(--gold); color: var(--brown-700); }
+    .chip.active { background: var(--gold); border-color: var(--gold); color: var(--brown-950); }
+
+    .menu-layout { display: grid; grid-template-columns: 260px 1fr; gap: 2.5rem; align-items: start; padding: 1.5rem 0 3rem; }
+    .filter-panel { background: var(--white); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); position: sticky; top: 88px; }
+    .filter-panel h4 { margin-bottom: 1rem; font-size: 1rem; border-bottom: 1px solid var(--cream-dark); padding-bottom: .75rem; }
+    .filter-group { margin-bottom: 1.25rem; }
+    .filter-group label { font-size: .83rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: .5rem; text-transform: uppercase; letter-spacing: .07em; }
+    .filter-group input[type=range] { width: 100%; accent-color: var(--gold); }
+    .filter-group .price-range-label { font-size: .82rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: .25rem; }
+    .search-input { width: 100%; padding: .65rem 1rem; border: 1.5px solid var(--cream-dark); border-radius: var(--radius-sm); outline: none; font-size: .9rem; transition: border-color var(--transition); }
+    .search-input:focus { border-color: var(--gold); }
+    .results-count { font-size: .82rem; color: var(--text-muted); margin-bottom: 1rem; padding: .5rem 0; }
+
+    /* Cake detail modal extras */
+    .variant-list { display: flex; flex-direction: column; gap: .5rem; }
+    .variant-option {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .7rem 1rem; border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
+    }
+    .variant-option:hover, .variant-option.selected { border-color: var(--gold); background: rgba(212,168,67,.06); }
+    .variant-option .variant-label { font-size: .9rem; font-weight: 500; }
+    .variant-option .variant-price { font-weight: 700; color: var(--brown-700); }
+
+    .qty-control { display: flex; align-items: center; gap: 1rem; }
+    .qty-control .qty-btn { width: 36px; height: 36px; font-size: 1.2rem; }
+    .qty-control .qty-val { font-size: 1.1rem; font-weight: 700; min-width: 28px; text-align: center; }
+
+    /* Card entrance animation */
+    @keyframes cardIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .cake-card { animation: cardIn .35s ease both; }
+
+    @media (max-width: 768px) {
+      .menu-layout { grid-template-columns: 1fr; }
+      .filter-panel { position: static; }
+      .category-chips { gap: .5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="./index.html" class="nav-logo">Jeycyl<span>Cakes</span></a>
+    <ul class="nav-links">
+      <li><a href="./index.html">Home</a></li>
+      <li><a href="./menu.html" class="active">Menu</a></li>
+      <li><a href="./track.html">Track Order</a></li>
+    </ul>
+    <button class="nav-cart-badge" id="cart-btn" aria-label="Open cart">
+      🛒<span class="nav-cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="container">
+    <p class="section-eyebrow">Browse & Order</p>
+    <h1>Our Cake Menu</h1>
+    <p>Pick a cake, choose your size &amp; flavour, and add it to your order.</p>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- Category Chips -->
+    <div class="category-chips" id="category-chips">
+      <button class="chip active" data-cat="all">🎂 All Cakes</button>
+      <button class="chip" data-cat="birthday">🎉 Birthday</button>
+      <button class="chip" data-cat="wedding">💍 Wedding</button>
+      <button class="chip" data-cat="corporate">🏢 Corporate</button>
+      <button class="chip" data-cat="chocolate">🍫 Chocolate</button>
+      <button class="chip" data-cat="fruit">🍓 Fruit & Fresh</button>
+      <button class="chip" data-cat="custom">✨ Custom</button>
+    </div>
+
+    <div class="menu-layout">
+
+      <!-- Filter Panel -->
+      <aside class="filter-panel">
+        <h4>🔍 Filter Cakes</h4>
+        <div class="filter-group">
+          <label>Search</label>
+          <input type="search" class="search-input" id="search-input" placeholder="Chocolate, Vanilla…">
+        </div>
+        <div class="filter-group">
+          <label>Max Price (KES)</label>
+          <input type="range" id="price-range" min="500" max="20000" value="20000" step="500">
+          <div class="price-range-label"><span>KES 500</span><span id="price-val">Any</span></div>
+        </div>
+        <div class="filter-group">
+          <label>Availability</label>
+          <select class="form-control" id="avail-filter">
+            <option value="all">All</option>
+            <option value="available">Available only</option>
+          </select>
+        </div>
+        <button class="btn btn-dark" style="width:100%;justify-content:center;margin-top:.5rem" id="clear-filters">Clear Filters</button>
+      </aside>
+
+      <!-- Cakes Grid -->
+      <section>
+        <div id="results-count" class="results-count" style="display:none"></div>
+        <div id="cakes-grid" class="grid-3">
+          <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:4rem">
+            <div class="spinner"></div>
+          </div>
+        </div>
+        <p id="empty-msg" style="display:none;text-align:center;padding:3rem;color:var(--text-muted)">No cakes match your filters. <a href="#" id="empty-clear" style="color:var(--gold)">Clear filters →</a></p>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<!-- Cake Detail Modal -->
+<div class="modal-backdrop" id="cake-modal" style="display:none">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <h3 id="modal-cake-name">Cake Name</h3>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <img id="modal-cake-img" src="" alt="" style="width:100%;height:240px;object-fit:cover;border-radius:var(--radius-md);margin-bottom:1.25rem">
+    <p id="modal-cake-desc" style="color:var(--text-muted);margin-bottom:1.25rem;line-height:1.7"></p>
+
+    <div id="modal-variants-section">
+      <label class="form-label">Choose Size / Flavour</label>
+      <div class="variant-list" id="modal-variants"></div>
+      <div style="margin-top:.75rem;font-size:.85rem;color:var(--text-muted)" id="modal-base-note"></div>
+    </div>
+
+    <div style="margin-top:1.5rem">
+      <label class="form-label">Quantity</label>
+      <div class="qty-control">
+        <button class="qty-btn" id="modal-qty-dec">−</button>
+        <span class="qty-val" id="modal-qty">1</span>
+        <button class="qty-btn" id="modal-qty-inc">+</button>
+        <span style="color:var(--text-muted);font-size:.9rem">× KES <span id="modal-unit-price">0</span></span>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--cream-dark)">
+      <div>
+        <div style="font-size:.8rem;color:var(--text-muted)">Total</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown-700)" id="modal-total">KES 0</div>
+      </div>
+      <button class="btn btn-primary btn-lg" id="modal-add-btn">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cart Sidebar -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h3>Your Order</h3>
+    <button class="modal-close" id="cart-close">✕</button>
+  </div>
+  <div class="cart-body" id="cart-body"></div>
+  <div class="cart-footer" id="cart-footer" style="display:none">
+    <div class="cart-total">
+      <strong>Total</strong>
+      <span class="cart-total-price" id="cart-total-price">KES 0</span>
+    </div>
+    <a href="./order.html" class="btn btn-primary" style="width:100%;justify-content:center">Proceed to Checkout →</a>
+  </div>
+</aside>
+
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Footer -->
+<footer class="footer" style="margin-top:4rem">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="nav-logo" style="margin-bottom:1rem">Jeycyl<span style="color:rgba(247,241,232,.6)">Cakes</span></div>
+        <p>Premium artisan cakes handcrafted in Nairobi with love and the finest ingredients.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./menu.html">Our Menu</a></li>
+          <li><a href="./order.html">Place Order</a></li>
+          <li><a href="./track.html">Track Order</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:+254700000000">📞 +254 700 000 000</a></li>
+          <li><a href="mailto:hello@jeycylcakes.com">📧 hello@jeycylcakes.com</a></li>
+          <li><a href="#">📍 Nairobi, Kenya</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Hours</h4>
+        <ul>
+          <li><a href="#">Mon–Fri: 8am – 8pm</a></li>
+          <li><a href="#">Sat: 8am – 10pm</a></li>
+          <li><a href="#">Sun: 10am – 6pm</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Jeycyl Cakes. All rights reserved.</span>
+      <a href="./admin/login.html">Admin</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+import { getCakes } from './shared/api.js';
+import { getCart, addToCart, updateQty, removeFromCart, cartTotal, cartCount } from './shared/cart.js';
+
+/* ── Toast ── */
+function showToast(msg, type = 'info') {
+  const tc = document.getElementById('toast-container');
+  const t  = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span><span>${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+/* ── Cart ── */
+function renderCart() {
+  const cart   = getCart();
+  const body   = document.getElementById('cart-body');
+  const footer = document.getElementById('cart-footer');
+  document.getElementById('cart-count').textContent = cartCount(cart);
+
+  if (!cart.length) {
+    body.innerHTML = '<div class="cart-empty"><svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg><p>Your cart is empty.<br><a href="./menu.html" style="color:var(--gold)">Browse our menu →</a></p></div>';
+    footer.style.display = 'none';
+    return;
+  }
+  footer.style.display = 'block';
+  document.getElementById('cart-total-price').textContent = `KES ${cartTotal(cart).toLocaleString()}`;
+  body.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <img class="cart-item-img" src="${item.imageUrl || './shared/cake-placeholder.png'}" alt="${item.name}" onerror="this.src='./shared/cake-placeholder.png'">
+      <div class="cart-item-info">
+        <h4>${item.name}</h4>
+        ${item.variantLabel ? `<span class="variant">${item.variantLabel}</span>` : ''}
+        <div class="price">KES ${(item.unitPrice * item.quantity).toLocaleString()}</div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" data-key="${item.key}" data-delta="-1">−</button>
+          <span class="qty-val">${item.quantity}</span>
+          <button class="qty-btn" data-key="${item.key}" data-delta="1">+</button>
+          <button class="cart-remove" data-key="${item.key}">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  body.querySelectorAll('.qty-btn').forEach(b =>
+    b.addEventListener('click', () => { updateQty(b.dataset.key, +b.dataset.delta); renderCart(); }));
+  body.querySelectorAll('.cart-remove').forEach(b =>
+    b.addEventListener('click', () => { removeFromCart(b.dataset.key); renderCart(); }));
+}
+
+function openCart()  { document.getElementById('cart-sidebar').classList.add('open'); document.getElementById('cart-overlay').classList.add('show'); }
+function closeCart() { document.getElementById('cart-sidebar').classList.remove('open'); document.getElementById('cart-overlay').classList.remove('show'); }
+document.getElementById('cart-btn').addEventListener('click', openCart);
+document.getElementById('cart-close').addEventListener('click', closeCart);
+document.getElementById('cart-overlay').addEventListener('click', closeCart);
+window.addEventListener('cart:updated', renderCart);
+
+/* ── Category chips ── */
+let activeCategory = 'all';
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeCategory = chip.dataset.cat;
+    applyFilters();
+  });
+});
+
+/* ── Filters ── */
+let allCakes = [];
+const searchEl = document.getElementById('search-input');
+const priceEl  = document.getElementById('price-range');
+const priceVal = document.getElementById('price-val');
+const availEl  = document.getElementById('avail-filter');
+
+priceEl.addEventListener('input', () => {
+  priceVal.textContent = priceEl.value == 20000 ? 'Any' : `KES ${Number(priceEl.value).toLocaleString()}`;
+  applyFilters();
+});
+searchEl.addEventListener('input', applyFilters);
+availEl.addEventListener('change', applyFilters);
+const clearFiltersBtn = document.getElementById('clear-filters');
+const emptyClearBtn = document.getElementById('empty-clear');
+clearFiltersBtn.addEventListener('click', clearAll);
+if (emptyClearBtn) emptyClearBtn.addEventListener('click', e => { e.preventDefault(); clearAll(); });
+
+function clearAll() {
+  searchEl.value = ''; priceEl.value = 20000; priceVal.textContent = 'Any'; availEl.value = 'all';
+  activeCategory = 'all';
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === 'all'));
+  applyFilters();
+}
+
+/* Category keyword mapping */
+const CAT_KEYWORDS = {
+  birthday:  ['birthday', 'birth', 'party', 'celebration'],
+  wedding:   ['wedding', 'bridal', 'bride', 'tiered', 'elegant'],
+  corporate: ['corporate', 'office', 'business', 'event', 'logo'],
+  chocolate: ['chocolate', 'fudge', 'cocoa', 'dark'],
+  fruit:     ['fruit', 'strawberry', 'berr', 'citrus', 'mango', 'pineapple', 'lemon', 'passion'],
+  custom:    ['custom', 'bespoke', 'special'],
+};
+
+function matchCategory(cake, cat) {
+  if (cat === 'all') return true;
+  const kws = CAT_KEYWORDS[cat] || [];
+  const hay = `${cake.name} ${cake.description || ''}`.toLowerCase();
+  return kws.some(k => hay.includes(k));
+}
+
+function applyFilters() {
+  const q     = searchEl.value.toLowerCase();
+  const maxP  = +priceEl.value;
+  const avail = availEl.value;
+  const filtered = allCakes.filter(c =>
+    matchCategory(c, activeCategory) &&
+    (q === '' || c.name.toLowerCase().includes(q) || (c.description || '').toLowerCase().includes(q)) &&
+    c.base_price <= maxP &&
+    (avail === 'all' || c.is_available)
+  );
+  renderGrid(filtered);
+}
+
+/* ── Render grid ── */
+function renderGrid(cakes) {
+  const grid     = document.getElementById('cakes-grid');
+  const emptyMsg = document.getElementById('empty-msg');
+  const countEl  = document.getElementById('results-count');
+  if (!cakes.length) { grid.innerHTML = ''; emptyMsg.style.display = 'block'; if(countEl) countEl.style.display='none'; return; }
+  emptyMsg.style.display = 'none';
+  if(countEl) { countEl.style.display='block'; countEl.innerHTML=`<strong>${cakes.length}</strong> cake${cakes.length!==1?'s':''} found`; }
+
+  grid.innerHTML = cakes.map(cake => `
+    <article class="card cake-card" id="cake-${cake.id}" data-id="${cake.id}">
+      <div class="cake-card-img">
+        <img src="${cake.image_url ? 'http://localhost:8080'+cake.image_url : './shared/cake-placeholder.png'}" alt="${cake.name}" loading="lazy" onerror="this.src='./shared/cake-placeholder.png'">
+        <span class="cake-badge ${cake.is_available ? '' : 'unavailable'}">${cake.is_available ? 'Available' : 'Sold Out'}</span>
+      </div>
+      <div class="cake-card-body">
+        <h3>${cake.name}</h3>
+        <p>${cake.description || 'Handcrafted with love and the finest ingredients.'}</p>
+        <div class="cake-price"><span class="cake-price-from">from </span>KES ${cake.base_price.toLocaleString()}</div>
+      </div>
+      <div class="cake-card-footer">
+        <button class="btn btn-outline btn-sm view-btn" data-id="${cake.id}">View Details</button>
+        ${cake.is_available ? `<button class="btn btn-primary btn-sm quick-add" data-id="${cake.id}">Add +</button>` : `<span style="color:var(--text-muted);font-size:.85rem">Unavailable</span>`}
+      </div>
+    </article>
+  `).join('');
+
+  grid.querySelectorAll('.view-btn').forEach(b =>
+    b.addEventListener('click', () => openModal(allCakes.find(c => c.id == b.dataset.id))));
+  grid.querySelectorAll('.quick-add').forEach(b =>
+    b.addEventListener('click', () => {
+      const cake = allCakes.find(c => c.id == b.dataset.id);
+      addToCart(cake);
+      renderCart();
+      showToast(`${cake.name} added to cart!`, 'success');
+      openCart();
+    }));
+}
+
+/* ── Load cakes ── */
+(async () => {
+  try {
+    allCakes = (await getCakes()) || [];
+    renderGrid(allCakes);
+    // scroll to anchor if present
+    const hash = window.location.hash;
+    if (hash) setTimeout(() => document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' }), 400);
+  } catch (e) {
+    document.getElementById('cakes-grid').innerHTML =
+      `<p style="color:var(--text-muted);grid-column:1/-1;padding:3rem;text-align:center">Failed to load cakes. Is the server running?<br><small>${e.message}</small></p>`;
+  }
+  renderCart();
+})();
+
+/* ── Modal ── */
+let modalCake = null, selectedVariant = null, modalQty = 1;
+
+function openModal(cake) {
+  if (!cake) return;
+  modalCake = cake; selectedVariant = null; modalQty = 1;
+  document.getElementById('modal-cake-name').textContent = cake.name;
+  const img = document.getElementById('modal-cake-img');
+  img.src  = cake.image_url ? 'http://localhost:8080'+cake.image_url : './shared/cake-placeholder.png';
+  img.onerror = () => { img.src = './shared/cake-placeholder.png'; };
+  document.getElementById('modal-cake-desc').textContent = cake.description || '';
+
+  const variantsSection = document.getElementById('modal-variants-section');
+  const variantList = document.getElementById('modal-variants');
+  const baseNote    = document.getElementById('modal-base-note');
+
+  if (cake.variants && cake.variants.length) {
+    variantsSection.style.display = 'block';
+    variantList.innerHTML = cake.variants.map(v => `
+      <div class="variant-option" data-vid="${v.id}">
+        <span class="variant-label">${v.size}${v.flavor ? ' — ' + v.flavor : ''}</span>
+        <span class="variant-price">KES ${(cake.base_price + v.price_modifier).toLocaleString()}</span>
+      </div>
+    `).join('');
+    variantList.querySelectorAll('.variant-option').forEach(el => {
+      el.addEventListener('click', () => {
+        variantList.querySelectorAll('.variant-option').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedVariant = cake.variants.find(v => v.id == el.dataset.vid);
+        updateModalPrice();
+      });
+    });
+    baseNote.textContent = `Base price (no variant): KES ${cake.base_price.toLocaleString()}`;
+  } else {
+    variantsSection.style.display = 'none';
+  }
+
+  updateModalPrice();
+  document.getElementById('cake-modal').style.display = 'flex';
+}
+
+function updateModalPrice() {
+  const unit = selectedVariant
+    ? (modalCake.base_price + selectedVariant.price_modifier)
+    : modalCake.base_price;
+  document.getElementById('modal-unit-price').textContent = unit.toLocaleString();
+  document.getElementById('modal-total').textContent = `KES ${(unit * modalQty).toLocaleString()}`;
+  document.getElementById('modal-qty').textContent = modalQty;
+}
+
+document.getElementById('modal-qty-inc').addEventListener('click', () => { modalQty++; updateModalPrice(); });
+document.getElementById('modal-qty-dec').addEventListener('click', () => { if (modalQty > 1) { modalQty--; updateModalPrice(); } });
+document.getElementById('modal-close').addEventListener('click', () => document.getElementById('cake-modal').style.display = 'none');
+document.getElementById('cake-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.style.display = 'none'; });
+
+document.getElementById('modal-add-btn').addEventListener('click', () => {
+  if (!modalCake) return;
+  addToCart(modalCake, selectedVariant, modalQty);
+  renderCart();
+  showToast(`${modalCake.name} added to cart!`, 'success');
+  document.getElementById('cake-modal').style.display = 'none';
+  openCart();
+});
+</script>
+</body>
+</html>

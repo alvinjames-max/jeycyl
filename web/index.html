@@ -1,212 +1,402 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Keepsafe Web - 3 Starter Template Switcher & Comparison</title>
-  <meta name="description" content="Compare 3 starter web app templates for Keepsafe: Minimal & Clean, Command Center Dashboard, and Bold & Modern Hero.">
-  <link rel="stylesheet" href="shared/shared.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jeycyl Cakes — Artisan Cakes, Baked with Love</title>
+  <meta name="description" content="Jeycyl Cakes crafts premium artisan cakes for every occasion. Browse our menu, customise your order, and get it delivered fresh to your door." />
+  <link rel="stylesheet" href="./shared/style.css" />
   <style>
-    body {
-      background: #0f172a;
-      color: #f8fafc;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .switcher-header {
-      padding: 3rem 2rem 2rem 2rem;
+    /* ── Features section ── */
+    .features-section { background: var(--brown-900); }
+    .feature-card {
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(212,168,67,.12);
+      transition: var(--transition);
       text-align: center;
-      background: radial-gradient(circle at top center, #1e293b 0%, #0f172a 100%);
-      border-bottom: 1px solid #334155;
     }
-    .switcher-title {
-      font-size: 2.5rem;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.75rem;
-      background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .feature-card:hover { background: rgba(212,168,67,.08); transform: translateY(-4px); }
+    .feature-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(212,168,67,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin: 0 auto 1.25rem;
     }
-    .switcher-subtitle {
-      color: #94a3b8;
-      font-size: 1.1rem;
-      max-width: 720px;
-      margin: 0 auto;
-    }
-    .templates-grid {
-      max-width: 1280px;
-      margin: 3rem auto;
-      padding: 0 1.5rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2rem;
-    }
-    .template-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
+    .feature-card h3 { color: var(--cream); font-size: 1.1rem; margin-bottom: .5rem; }
+    .feature-card p  { color: rgba(247,241,232,.6); font-size: .88rem; }
+
+    /* ── Testimonials ── */
+    .testimonials-section { background: var(--cream-dark); }
+    .testimonial-card { background: var(--white); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+    .stars { color: var(--gold); font-size: 1rem; margin-bottom: 1rem; }
+    .testimonial-card blockquote { font-size: .95rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.25rem; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: .75rem; }
+    .testimonial-author img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: var(--cream-dark); }
+    .testimonial-author strong { font-size: .9rem; display: block; }
+    .testimonial-author span   { font-size: .78rem; color: var(--text-muted); }
+
+    /* ── CTA banner ── */
+    .cta-banner {
+      background: linear-gradient(135deg, var(--brown-800), var(--brown-600));
+      border-radius: var(--radius-xl);
+      padding: 4rem;
+      text-align: center;
+      position: relative;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      transition: all 0.3s ease;
-      position: relative;
     }
-    .template-card:hover {
-      transform: translateY(-6px);
-      border-color: #38bdf8;
-      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.4);
+    .cta-banner::before {
+      content: '🎂';
+      position: absolute;
+      font-size: 18rem;
+      opacity: .04;
+      right: -4rem;
+      top: -3rem;
+      line-height: 1;
     }
-    .preview-header {
-      height: 160px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
+    .cta-banner h2 { color: var(--cream); margin-bottom: 1rem; }
+    .cta-banner p  { color: rgba(247,241,232,.7); max-width: 480px; margin: 0 auto 2rem; }
+
+    /* ─ Hero entrance animations ─ */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    .hero-tagline   { animation: fadeUp .6s .15s both; }
+    .hero h1        { animation: fadeUp .6s .3s both; }
+    .hero > div.hero-overlay + div .hero-content > p { animation: fadeUp .6s .45s both; }
+    .hero-actions   { animation: fadeUp .6s .6s both; }
+    .hero-content > p { animation: fadeUp .6s .45s both; }
+
+    /* ─ Scroll arrow ─ */
+    .scroll-arrow {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      cursor: pointer;
+      animation: bounce 2s infinite;
+      color: rgba(247,241,232,.5);
+      font-size: 1.5rem;
+      line-height: 1;
+      text-align: center;
     }
-    .card-body {
-      padding: 1.5rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
     }
-    .launch-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 700;
-      text-decoration: none;
-      color: white;
-      margin-top: auto;
-      transition: opacity 0.2s ease;
-    }
-    .launch-btn:hover {
-      opacity: 0.9;
-    }
-    .feature-list {
-      list-style: none;
-      margin: 1rem 0 1.5rem 0;
-      font-size: 0.88rem;
-      color: #cbd5e1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .feature-list li::before {
-      content: "✓ ";
-      color: #10b981;
-      font-weight: bold;
-    }
+
+    /* ─ Cakes loading state ─ */
+    #featured-cakes-grid { min-height: 280px; }
+    .loading-center { display: flex; align-items: center; justify-content: center; padding: 4rem; grid-column: 1 / -1; }
+
+    /* ─ Card entrance for home featured section ─ */
+    @keyframes cardIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
 <body>
 
-  <!-- Kenyan Flag Brand Strip -->
-  <div class="kenyan-flag-strip"></div>
+<!-- ── Navbar ── -->
+<nav class="navbar" id="main-nav">
+  <div class="container">
+    <a href="./index.html" class="nav-logo">Jeycyl<span>Cakes</span></a>
+    <ul class="nav-links">
+      <li><a href="./index.html" class="active">Home</a></li>
+      <li><a href="./menu.html">Menu</a></li>
+      <li><a href="./track.html">Track Order</a></li>
+    </ul>
+    <button class="nav-cart-badge" id="cart-btn" aria-label="Open cart">
+      🛒
+      <span class="nav-cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</nav>
 
-  <!-- Switcher Header -->
-  <header class="switcher-header">
-    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(5, 150, 105, 0.15); color: #10b981; padding: 4px 14px; border-radius: 9999px; font-weight: 600; font-size: 0.85rem; margin-bottom: 1rem; border: 1px solid rgba(16, 185, 129, 0.3);">
-      🛡️ KEEPSAFE WEB STARTER TEMPLATES
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-bg" style="background-image:url('./shared/hero.png')"></div>
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <div class="hero-tagline">✨ Handcrafted in Nairobi</div>
+    <h1>Premium Cakes<br>Baked with <em>Love</em></h1>
+    <p>Every celebration deserves perfection. From birthdays to weddings, Jeycyl Cakes delivers artisan creations made from the finest ingredients.</p>
+    <div class="hero-actions">
+      <a href="./menu.html" class="btn btn-primary btn-lg">Browse Our Cakes</a>
+      <a href="./track.html" class="btn btn-outline btn-lg">Track My Order</a>
     </div>
-    <h1 class="switcher-title">Compare & Pick Your Design Architecture</h1>
-    <p class="switcher-subtitle">
-      Three distinct starter templates built on shared logic, mock Kenyan transit data, real-time geofence radars, and one-tap emergency SOS dispatch.
-    </p>
-  </header>
+  </div>
+  <div class="container" style="position:relative;z-index:2;">
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>500+</strong><span>Happy Customers</span></div>
+      <div class="hero-stat"><strong>50+</strong><span>Cake Varieties</span></div>
+      <div class="hero-stat"><strong>5★</strong><span>Average Rating</span></div>
+    </div>
+  </div>
+  <!-- Scroll hint -->
+  <div class="scroll-arrow" onclick="window.scrollBy({top:window.innerHeight*.85,behavior:'smooth'})" title="Scroll down">↓</div>
+</section>
 
-  <!-- Templates Grid -->
-  <main class="templates-grid">
-    
-    <!-- Template A Card -->
-    <div class="template-card">
-      <div class="preview-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 2px solid #059669;">
-        <span class="badge badge-low" style="align-self: flex-start;">TEMPLATE A</span>
-        <div>
-          <h2 style="font-size: 1.4rem; font-weight: 800; color: white;">Minimal & Clean</h2>
-          <div style="font-size: 0.85rem; color: #a7f3d0;">Calm, civic & trustworthy design</div>
+<!-- ── Featured Cakes ── -->
+<section class="section">
+  <div class="container">
+    <p class="section-eyebrow">Our Specialties</p>
+    <h2 style="margin-bottom:2.5rem">Featured Cakes</h2>
+    <div class="grid-4" id="featured-cakes-grid">
+      <div class="loading-center"><div class="spinner"></div></div>
+    </div>
+    <div style="text-align:center;margin-top:2.5rem">
+      <a href="./menu.html" class="btn btn-dark btn-lg">View Full Menu →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section class="section features-section">
+  <div class="container">
+    <p class="section-eyebrow" style="text-align:center;color:var(--gold-light)">Why Choose Us</p>
+    <h2 style="text-align:center;color:var(--cream);margin-bottom:3rem">The Jeycyl Difference</h2>
+    <div class="grid-4">
+      <div class="feature-card">
+        <div class="feature-icon">🌿</div>
+        <h3>Premium Ingredients</h3>
+        <p>Only the finest locally-sourced and imported ingredients go into every cake.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Custom Designs</h3>
+        <p>Tell us your vision, and our artisans will bring it to life with stunning detail.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚐</div>
+        <h3>Fresh Delivery</h3>
+        <p>Same-day and next-day delivery across Nairobi — always fresh, always on time.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>WhatsApp Updates</h3>
+        <p>Receive real-time order updates and confirmations directly on WhatsApp.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonials ── -->
+<section class="section testimonials-section">
+  <div class="container">
+    <p class="section-eyebrow" style="text-align:center">Customer Love</p>
+    <h2 style="text-align:center;margin-bottom:3rem">What People Say</h2>
+    <div class="grid-3">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"The wedding cake was absolutely stunning! Every guest was amazed by both the design and the taste. Jeycyl Cakes exceeded every expectation."</blockquote>
+        <div class="testimonial-author">
+          <div style="width:42px;height:42px;border-radius:50%;background:var(--brown-400);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">A</div>
+          <div><strong>Amina Wanjiku</strong><span>Wedding Client</span></div>
         </div>
       </div>
-      <div class="card-body">
-        <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5;">
-          Top navbar with centered 1200px layout. Clean slate cards, high readability typography, subtle floating SOS pill button, and calm emerald accents.
-        </p>
-        <ul class="feature-list">
-          <li>Top header tabs & clean max-width container</li>
-          <li>Calm Civic Emerald & Slate palette</li>
-          <li>Floating emergency SOS action pill</li>
-          <li>Split map & incident feed layout</li>
-        </ul>
-        <a href="template-a/index.html" class="launch-btn" style="background: #059669;">
-          🚀 Launch Template A →
-        </a>
-      </div>
-    </div>
-
-    <!-- Template B Card -->
-    <div class="template-card">
-      <div class="preview-header" style="background: linear-gradient(135deg, #090d16 0%, #0f172a 100%); border-bottom: 2px solid #38bdf8;">
-        <span class="badge badge-medium" style="align-self: flex-start; background: #0284c7; color: white; border: none;">TEMPLATE B</span>
-        <div>
-          <h2 style="font-size: 1.4rem; font-weight: 800; color: white;">Command Center Dashboard</h2>
-          <div style="font-size: 0.85rem; color: #38bdf8;">Data-dense, map-centered command UI</div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Ordered a birthday cake on short notice and it was delivered on time, fresh, and looked exactly like the picture. Will always be my go-to bakery!"</blockquote>
+        <div class="testimonial-author">
+          <div style="width:42px;height:42px;border-radius:50%;background:var(--brown-600);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">K</div>
+          <div><strong>Kevin Otieno</strong><span>Birthday Order</span></div>
         </div>
       </div>
-      <div class="card-body">
-        <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5;">
-          Dark mode dashboard layout with a collapsible left navigation sidebar, full-height live map canvas, right-hand live alerts drawer, and persistent SOS widget.
-        </p>
-        <ul class="feature-list">
-          <li>Fixed left sidebar navigation & telemetry status</li>
-          <li>Full-height interactive live radar canvas</li>
-          <li>Right panel real-time incident cards drawer</li>
-          <li>Sidebar persistent pulse SOS widget</li>
-        </ul>
-        <a href="template-b/index.html" class="launch-btn" style="background: #0284c7;">
-          🚀 Launch Template B →
-        </a>
-      </div>
-    </div>
-
-    <!-- Template C Card -->
-    <div class="template-card">
-      <div class="preview-header" style="background: linear-gradient(135deg, #3b0764 0%, #0f051d 100%); border-bottom: 2px solid #ef4444;">
-        <span class="badge badge-critical" style="align-self: flex-start;">TEMPLATE C</span>
-        <div>
-          <h2 style="font-size: 1.4rem; font-weight: 800; color: white;">Bold & Modern Hero</h2>
-          <div style="font-size: 0.85rem; color: #f97316;">Hero-led, high visual emergency priority</div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"The chocolate fudge cake is out of this world. Rich, moist, and not too sweet. My office team loved every bite. Ordering again next month!"</blockquote>
+        <div class="testimonial-author">
+          <div style="width:42px;height:42px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:var(--brown-950);font-weight:700;">N</div>
+          <div><strong>Njeri Kamau</strong><span>Corporate Client</span></div>
         </div>
       </div>
-      <div class="card-body">
-        <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5;">
-          High-impact obsidian dark theme with a live danger ticker, massive pulse-animated hero SOS emergency button, and vibrant card grids.
-        </p>
-        <ul class="feature-list">
-          <li>Live danger alert ticker header</li>
-          <li>Giant pulsing hero emergency SOS trigger</li>
-          <li>Vivid obsidian, crimson & coral gradient UI</li>
-          <li>Large visual cards with hover depth</li>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="section">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Ready to Order Your Dream Cake?</h2>
+      <p>Browse our full menu, pick your cake, choose your size and flavour, and we'll handle the rest.</p>
+      <a href="./menu.html" class="btn btn-primary btn-lg">Order Now</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="nav-logo">Jeycyl<span style="color:rgba(247,241,232,.6)">Cakes</span></div>
+        <p>Premium artisan cakes handcrafted in Nairobi with love and the finest ingredients. Every slice tells a story.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./menu.html">Our Menu</a></li>
+          <li><a href="./order.html">Place Order</a></li>
+          <li><a href="./track.html">Track Order</a></li>
         </ul>
-        <a href="template-c/index.html" class="launch-btn" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-          🚀 Launch Template C →
-        </a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="#">📞 +254 700 000 000</a></li>
+          <li><a href="#">📧 hello@jeycylcakes.com</a></li>
+          <li><a href="#">📍 Nairobi, Kenya</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Hours</h4>
+        <ul>
+          <li><a href="#">Mon–Fri: 8am – 8pm</a></li>
+          <li><a href="#">Sat: 8am – 10pm</a></li>
+          <li><a href="#">Sun: 10am – 6pm</a></li>
+        </ul>
       </div>
     </div>
+    <div class="footer-bottom">
+      <span>© 2025 Jeycyl Cakes. All rights reserved.</span>
+      <a href="./admin/login.html">Admin</a>
+    </div>
+  </div>
+</footer>
 
-  </main>
+<!-- ── Cart Sidebar ── -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h3>Your Order</h3>
+    <button class="modal-close" id="cart-close">✕</button>
+  </div>
+  <div class="cart-body" id="cart-body">
+    <div class="cart-empty">
+      <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      <p>Your cart is empty.<br><a href="./menu.html" style="color:var(--gold)">Browse our menu →</a></p>
+    </div>
+  </div>
+  <div class="cart-footer" id="cart-footer" style="display:none">
+    <div class="cart-total">
+      <strong>Total</strong>
+      <span class="cart-total-price" id="cart-total-price">KES 0</span>
+    </div>
+    <a href="./order.html" class="btn btn-primary" style="width:100%;justify-content:center">Proceed to Checkout →</a>
+  </div>
+</aside>
 
-  <footer style="text-align: center; padding: 2rem; border-top: 1px solid #334155; color: #64748b; font-size: 0.85rem; margin-top: auto;">
-    Keepsafe Web Starter Suite • Kenya Commuter Safety Platform • Shared Logic Architecture
-  </footer>
+<!-- ── Toast Container ── -->
+<div class="toast-container" id="toast-container"></div>
 
+<script type="module">
+import { getCakes } from './shared/api.js';
+import { getCart, cartCount, cartTotal, updateQty, removeFromCart, addToCart } from './shared/cart.js';
+
+/* ── Toast ── */
+window.showToast = function(msg, type = 'info') {
+  const tc = document.getElementById('toast-container');
+  const t  = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span><span>${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3500);
+};
+
+/* ── Cart UI ── */
+function renderCart() {
+  const cart = getCart();
+  const body   = document.getElementById('cart-body');
+  const footer = document.getElementById('cart-footer');
+  const count  = document.getElementById('cart-count');
+  count.textContent = cartCount(cart);
+
+  if (!cart.length) {
+    body.innerHTML = `<div class="cart-empty"><svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg><p>Your cart is empty.<br><a href="./menu.html" style="color:var(--gold)">Browse our menu →</a></p></div>`;
+    footer.style.display = 'none';
+    return;
+  }
+
+  footer.style.display = 'block';
+  document.getElementById('cart-total-price').textContent = `KES ${cartTotal(cart).toLocaleString()}`;
+  body.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <img class="cart-item-img" src="${item.imageUrl || './shared/cake-placeholder.png'}" alt="${item.name}" onerror="this.src='./shared/cake-placeholder.png'">
+      <div class="cart-item-info">
+        <h4>${item.name}</h4>
+        ${item.variantLabel ? `<span class="variant">${item.variantLabel}</span>` : ''}
+        <div class="price">KES ${(item.unitPrice * item.quantity).toLocaleString()}</div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" data-key="${item.key}" data-delta="-1">−</button>
+          <span class="qty-val">${item.quantity}</span>
+          <button class="qty-btn" data-key="${item.key}" data-delta="1">+</button>
+          <button class="cart-remove" data-key="${item.key}" title="Remove">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  body.querySelectorAll('.qty-btn').forEach(btn =>
+    btn.addEventListener('click', () => { updateQty(btn.dataset.key, +btn.dataset.delta); renderCart(); }));
+  body.querySelectorAll('.cart-remove').forEach(btn =>
+    btn.addEventListener('click', () => { removeFromCart(btn.dataset.key); renderCart(); }));
+}
+
+/* ── Load featured cakes ── */
+async function loadFeatured() {
+  const grid = document.getElementById('featured-cakes-grid');
+  try {
+    const cakes = (await getCakes()) || [];
+    const featured = cakes.slice(0, 8);
+    if (!featured.length) {
+      grid.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:3rem">No cakes available yet — check back soon!</p>';
+      return;
+    }
+    grid.innerHTML = featured.map((cake, i) => `
+      <article class="card cake-card" data-id="${cake.id}" style="animation: cardIn .4s ${i * 0.08}s both">
+        <div class="cake-card-img">
+          <img src="${cake.image_url ? 'http://localhost:8080'+cake.image_url : './shared/cake-placeholder.png'}" alt="${cake.name}" loading="lazy" onerror="this.src='./shared/cake-placeholder.png'">
+          <span class="cake-badge ${cake.is_available ? '' : 'unavailable'}">${cake.is_available ? 'Available' : 'Sold Out'}</span>
+        </div>
+        <div class="cake-card-body">
+          <h3>${cake.name}</h3>
+          <p>${cake.description || 'Artisan cake baked with premium ingredients.'}</p>
+          <div class="cake-price"><span class="cake-price-from">from </span>KES ${cake.base_price.toLocaleString()}</div>
+        </div>
+        <div class="cake-card-footer">
+          <a href="./menu.html#cake-${cake.id}" class="btn btn-ghost btn-sm">Details</a>
+          ${cake.is_available ? `<button class="btn btn-primary btn-sm add-cart" data-cake='${JSON.stringify(cake)}'>Add +</button>` : '<span style="color:var(--text-muted);font-size:.85rem">Unavailable</span>'}
+        </div>
+      </article>
+    `).join('');
+
+    grid.querySelectorAll('.add-cart').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cake = JSON.parse(btn.dataset.cake);
+        addToCart(cake);
+        renderCart();
+        showToast(`${cake.name} added to cart!`, 'success');
+        openCart();
+      });
+    });
+  } catch (e) {
+    grid.innerHTML = `<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:3rem">Could not load cakes. Make sure the server is running.<br><small>${e.message}</small></p>`;
+  }
+}
+
+/* ── Cart open/close ── */
+function openCart()  { document.getElementById('cart-sidebar').classList.add('open'); document.getElementById('cart-overlay').classList.add('show'); }
+function closeCart() { document.getElementById('cart-sidebar').classList.remove('open'); document.getElementById('cart-overlay').classList.remove('show'); }
+
+document.getElementById('cart-btn').addEventListener('click', openCart);
+document.getElementById('cart-close').addEventListener('click', closeCart);
+document.getElementById('cart-overlay').addEventListener('click', closeCart);
+window.addEventListener('cart:updated', renderCart);
+
+renderCart();
+loadFeatured();
+</script>
 </body>
 </html>

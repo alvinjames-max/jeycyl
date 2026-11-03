@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Jeycyl Cakes Admin</title>
+  <meta name="description" content="Jeycyl Cakes admin dashboard — manage orders and cakes." />
+  <link rel="stylesheet" href="../shared/style.css" />
+  <style>
+    body { background: #f5ede2; }
+
+    /* Tab panels */
+    .tab-btns { display: flex; gap: .5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .tab-btn {
+      padding: .55rem 1.25rem;
+      border-radius: var(--radius-md);
+      border: none; background: var(--white);
+      color: var(--text-muted); font-size: .88rem; font-weight: 600;
+      cursor: pointer; transition: var(--transition);
+    }
+    .tab-btn.active { background: var(--brown-900); color: var(--cream); }
+    .tab-btn:hover:not(.active) { background: var(--cream-dark); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Cake form */
+    .cake-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .cake-form-grid { grid-template-columns: 1fr; } }
+
+    /* Order row extra */
+    .order-meta { font-size: .8rem; color: var(--text-muted); }
+
+    /* Upload button */
+    .upload-label {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .45rem 1rem; border-radius: var(--radius-sm);
+      background: var(--cream); border: 1.5px solid var(--cream-dark);
+      cursor: pointer; font-size: .82rem; font-weight: 600;
+      transition: var(--transition);
+    }
+    .upload-label:hover { border-color: var(--gold); background: rgba(212,168,67,.06); }
+    input[type=file] { display: none; }
+
+    /* Availability toggle */
+    .toggle {
+      position: relative; display: inline-block; width: 44px; height: 24px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: #ccc; border-radius: 24px; cursor: pointer;
+      transition: var(--transition);
+    }
+    .slider::before {
+      content: ''; position: absolute;
+      height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background: white; border-radius: 50%; transition: var(--transition);
+    }
+    input:checked + .slider { background: var(--gold); }
+    input:checked + .slider::before { transform: translateX(20px); }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; margin-bottom: 2rem; }
+    @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 480px) { .stats-row { grid-template-columns: 1fr; } }
+
+    /* Auth guard overlay */
+    #auth-guard {
+      position: fixed; inset: 0;
+      background: var(--brown-950);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+      flex-direction: column; gap: 1rem;
+    }
+    #auth-guard p { color: rgba(247,241,232,.6); font-size: .9rem; }
+
+    /* Stat card icon */
+    .stat-card-icon { font-size: 1.6rem; margin-bottom: .75rem; line-height: 1; }
+    .stat-card .value { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--brown-900); font-weight: 700; margin: .25rem 0; }
+    .stat-card.gold-accent { border-top: 3px solid var(--gold); }
+  </style>
+</head>
+<body>
+
+<div class="admin-layout" id="admin-layout" style="display:none">
+
+  <!-- Auth guard -->
+  <div id="auth-guard">
+    <div class="spinner"></div>
+    <p>Checking authentication…</p>
+  </div>
+
+  <!-- Sidebar -->
+  <nav class="admin-sidebar">
+    <div class="admin-sidebar-logo">
+      <a href="../index.html" class="nav-logo">Jeycyl<span style="color:rgba(247,241,232,.5)">Cakes</span></a>
+    </div>
+    <div class="admin-nav">
+      <div class="admin-nav-item active" data-tab="overview">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        Overview
+      </div>
+      <div class="admin-nav-item" data-tab="orders">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Orders
+      </div>
+      <div class="admin-nav-item" data-tab="cakes">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.701 2.701 0 01-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"/></svg>
+        Cakes
+      </div>
+      <div class="admin-nav-item" data-tab="add-cake">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add Cake
+      </div>
+      <div class="admin-nav-item" data-tab="customers">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Customers
+      </div>
+    </div><!-- end .admin-nav -->
+    <div style="padding:1.5rem">
+      <button class="btn btn-ghost" id="logout-btn" style="color:rgba(247,241,232,.5);font-size:.85rem;width:100%;justify-content:center">
+        ⬅ Sign Out
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h2 id="topbar-title">Overview</h2>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <button class="btn btn-primary btn-sm" id="refresh-all-btn">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- ── OVERVIEW ── -->
+      <div class="tab-panel active" id="panel-overview">
+        <div class="stats-row" id="stats-row">
+          <div class="stat-card gold-accent">
+            <div class="stat-card-icon">📋</div>
+            <div class="label">Total Orders</div>
+            <div class="value" id="stat-total">—</div>
+          </div>
+          <div class="stat-card gold-accent">
+            <div class="stat-card-icon">⏳</div>
+            <div class="label">Pending</div>
+            <div class="value" id="stat-pending">—</div>
+          </div>
+          <div class="stat-card gold-accent">
+            <div class="stat-card-icon">📦</div>
+            <div class="label">In Progress</div>
+            <div class="value" id="stat-progress">—</div>
+          </div>
+          <div class="stat-card gold-accent">
+            <div class="stat-card-icon">💰</div>
+            <div class="label">Total Revenue</div>
+            <div class="value" id="stat-revenue">—</div>
+          </div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h3>Recent Orders</h3>
+            <button class="btn btn-outline btn-sm" data-tab="orders" id="see-all-btn">See All →</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>ID</th><th>Customer</th><th>Status</th><th>Total</th><th>Date</th></tr></thead>
+              <tbody id="recent-orders-body"><tr><td colspan="5" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ORDERS ── -->
+      <div class="tab-panel" id="panel-orders">
+        <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h3>All Orders</h3>
+            <span id="orders-count" style="font-size:.85rem;color:var(--text-muted)"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>ID</th><th>Customer ID</th><th>Status</th><th>Total</th><th>Address</th><th>Date</th><th>Update</th></tr></thead>
+              <tbody id="all-orders-body"><tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CAKES ── -->
+      <div class="tab-panel" id="panel-cakes">
+        <div class="admin-panel">
+          <div class="admin-panel-header"><h3>Cake Catalogue</h3></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>ID</th><th>Name</th><th>Base Price</th><th>Available</th><th>Image</th><th>Action</th></tr></thead>
+              <tbody id="cakes-body"><tr><td colspan="6" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CUSTOMERS ── -->
+      <div class="tab-panel" id="panel-customers">
+        <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h3>Customers</h3>
+            <span id="customers-count" style="font-size:.85rem;color:var(--text-muted)"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Orders</th></tr></thead>
+              <tbody id="customers-body"><tr><td colspan="5" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADD CAKE ── -->
+      <div class="tab-panel" id="panel-add-cake">
+        <div class="admin-panel">
+          <div class="admin-panel-header"><h3>Add New Cake</h3></div>
+          <div style="padding:1.5rem">
+            <div id="cake-form-error" style="display:none;background:#fce8e8;color:#b71c1c;padding:.75rem 1rem;border-radius:var(--radius-sm);margin-bottom:1rem;font-size:.88rem"></div>
+            <div id="cake-form-success" style="display:none;background:#e8fdf0;color:#2e7d32;padding:.75rem 1rem;border-radius:var(--radius-sm);margin-bottom:1rem;font-size:.88rem"></div>
+            <form id="add-cake-form">
+              <div class="cake-form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="cake-name">Cake Name *</label>
+                  <input type="text" class="form-control" id="cake-name" placeholder="e.g. Chocolate Fudge" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cake-price">Base Price (KES) *</label>
+                  <input type="number" class="form-control" id="cake-price" placeholder="e.g. 2500" min="0" step="50" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="cake-desc">Description</label>
+                <textarea class="form-control" id="cake-desc" rows="3" placeholder="Describe the cake ingredients, taste, occasions…"></textarea>
+              </div>
+
+              <!-- Variants Section -->
+              <div style="margin:1.5rem 0">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                  <label class="form-label" style="margin:0">Size / Flavour Variants <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+                  <button type="button" class="btn btn-outline btn-sm" id="add-variant-btn">+ Add Variant</button>
+                </div>
+                <div id="variants-list" style="display:flex;flex-direction:column;gap:.75rem"></div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg" id="add-cake-btn">Add Cake</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script type="module">
+import {
+  adminListOrders, adminCreateCake, adminSetAvailability, adminUpdateStatus,
+  adminUploadImage, logout
+} from '../shared/api.js';
+
+/* ── Toast ── */
+function showToast(msg, type = 'info') {
+  const tc = document.getElementById('toast-container');
+  const t  = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span><span>${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+/* ── Tab switching ── */
+const titles = { overview: 'Overview', orders: 'Orders', cakes: 'Cakes', 'add-cake': 'Add Cake', customers: 'Customers' };
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-nav-item').forEach(i => i.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('active');
+  document.querySelector(`.admin-nav-item[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('topbar-title').textContent = titles[tab] || tab;
+  if (tab === 'orders' || tab === 'overview') loadOrders();
+  if (tab === 'cakes') loadCakes();
+  if (tab === 'customers') loadCustomers();
+}
+
+document.querySelectorAll('.admin-nav-item, [data-tab]').forEach(el =>
+  el.addEventListener('click', () => switchTab(el.dataset.tab)));
+
+/* ── Data ── */
+let allOrders = [];
+
+async function loadOrders() {
+  try {
+    allOrders = (await adminListOrders()) || [];
+    renderOrders();
+    renderStats();
+  } catch (e) {
+    showToast('Failed to load orders: ' + e.message, 'error');
+  }
+}
+
+function renderStats() {
+  const total    = allOrders.length;
+  const pending  = allOrders.filter(o => o.status === 'pending').length;
+  const progress = allOrders.filter(o => o.status === 'in_progress').length;
+  const revenue  = allOrders.reduce((s, o) => s + (o.total_amount || 0), 0);
+  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-pending').textContent  = pending;
+  document.getElementById('stat-progress').textContent = progress;
+  document.getElementById('stat-revenue').textContent  = `KES ${revenue.toLocaleString()}`;
+}
+
+const statusOptions = ['pending','confirmed','paid','in_progress','ready','delivered','cancelled'];
+
+function renderOrders() {
+  /* Recent */
+  const recentTbody = document.getElementById('recent-orders-body');
+  const allTbody    = document.getElementById('all-orders-body');
+  const countEl     = document.getElementById('orders-count');
+  countEl.textContent = `${allOrders.length} orders total`;
+
+  const rowHTML = (o) => `
+    <tr>
+      <td><strong>#${o.id}</strong></td>
+      <td class="order-meta">${o.customer_id}</td>
+      <td><span class="status-badge status-${o.status}">${o.status.replace('_',' ')}</span></td>
+      <td><strong>KES ${(o.total_amount||0).toLocaleString()}</strong></td>
+      ${allTbody ? `<td class="order-meta" style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.delivery_address || '—'}</td>` : ''}
+      <td class="order-meta">${new Date(o.created_at).toLocaleDateString()}</td>
+      <td>
+        <select class="status-select" data-order-id="${o.id}" data-current="${o.status}">
+          ${statusOptions.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s.replace('_',' ')}</option>`).join('')}
+        </select>
+      </td>
+    </tr>
+  `;
+
+  if (recentTbody) {
+    recentTbody.innerHTML = allOrders.slice(0, 5).map(o => rowHTML(o)).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem">No orders yet.</td></tr>';
+    bindStatusSelects(recentTbody);
+  }
+  if (allTbody && allTbody !== recentTbody) {
+    allTbody.innerHTML = allOrders.map(o => rowHTML(o)).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No orders yet.</td></tr>';
+    bindStatusSelects(allTbody);
+  }
+}
+
+function bindStatusSelects(container) {
+  container.querySelectorAll('.status-select').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const orderId = +sel.dataset.orderId;
+      const status  = sel.value;
+      try {
+        await adminUpdateStatus(orderId, status);
+        showToast(`Order #${orderId} → ${status}`, 'success');
+        allOrders = allOrders.map(o => o.id === orderId ? {...o, status} : o);
+      } catch (e) {
+        showToast('Failed to update: ' + e.message, 'error');
+        sel.value = sel.dataset.current;
+      }
+    });
+  });
+}
+
+async function loadCakes() {
+  const tbody = document.getElementById('cakes-body');
+  try {
+    const res  = await fetch('http://localhost:8080/cakes', { credentials: 'include' });
+    const cakes = res.ok ? await res.json() : [];
+    if (!cakes || !cakes.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem">No cakes yet. Add one!</td></tr>';
+      return;
+    }
+    tbody.innerHTML = cakes.map(cake => `
+      <tr>
+        <td>#${cake.id}</td>
+        <td><strong>${cake.name}</strong>${cake.description ? `<br><small style="color:var(--text-muted)">${cake.description.slice(0,60)}${cake.description.length>60?'…':''}</small>` : ''}</td>
+        <td>KES ${(cake.base_price||0).toLocaleString()}</td>
+        <td>
+          <label class="toggle">
+            <input type="checkbox" class="avail-toggle" data-cake-id="${cake.id}" ${cake.is_available ? 'checked' : ''}>
+            <span class="slider"></span>
+          </label>
+        </td>
+        <td>
+          <label class="upload-label">
+            📷 Upload
+            <input type="file" class="image-upload" data-cake-id="${cake.id}" accept=".jpg,.jpeg,.png,.webp">
+          </label>
+          ${cake.image_url ? `<a href="http://localhost:8080${cake.image_url}" target="_blank" style="font-size:.78rem;color:var(--gold);margin-left:.5rem">View</a>` : ''}
+        </td>
+        <td>
+          <button class="btn btn-ghost btn-sm delete-cake-btn" data-cake-id="${cake.id}" style="color:#e53935;font-size:.8rem" title="Delete cake">🗑 Delete</button>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.avail-toggle').forEach(tog => {
+      tog.addEventListener('change', async () => {
+        try {
+          await adminSetAvailability(+tog.dataset.cakeId, tog.checked);
+          showToast(`Cake #${tog.dataset.cakeId} ${tog.checked ? 'enabled' : 'disabled'}`, 'success');
+        } catch (e) {
+          tog.checked = !tog.checked;
+          showToast('Failed: ' + e.message, 'error');
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.image-upload').forEach(inp => {
+      inp.addEventListener('change', async () => {
+        if (!inp.files[0]) return;
+        try {
+          await adminUploadImage(+inp.dataset.cakeId, inp.files[0]);
+          showToast(`Image uploaded for Cake #${inp.dataset.cakeId}`, 'success');
+          loadCakes();
+        } catch (e) { showToast('Upload failed: ' + e.message, 'error'); }
+      });
+    });
+
+    tbody.querySelectorAll('.delete-cake-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const cakeId = +btn.dataset.cakeId;
+        if (!confirm(`Delete Cake #${cakeId}? This cannot be undone.`)) return;
+        try {
+          await fetch(`http://localhost:8080/admin/cakes/${cakeId}`, { method: 'DELETE', credentials: 'include' });
+          showToast(`Cake #${cakeId} deleted`, 'success');
+          loadCakes();
+        } catch (e) { showToast('Delete failed: ' + e.message, 'error'); }
+      });
+    });
+
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem">Failed to load cakes: ${e.message}</td></tr>`;
+  }
+}
+
+/* ── Variant rows ── */
+let variantCount = 0;
+document.getElementById('add-variant-btn').addEventListener('click', () => {
+  const list = document.getElementById('variants-list');
+  const idx  = variantCount++;
+  const row  = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.5rem;align-items:center';
+  row.innerHTML = `
+    <input class="form-control" placeholder="Size (e.g. 6 inch)" data-var="size" data-idx="${idx}">
+    <input class="form-control" placeholder="Flavour (optional)" data-var="flavor" data-idx="${idx}">
+    <input class="form-control" type="number" placeholder="Price +/- KES" data-var="price_modifier" data-idx="${idx}" step="50">
+    <button type="button" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#ccc;padding:.25rem" data-remove-var>✕</button>
+  `;
+  row.querySelector('[data-remove-var]').addEventListener('click', () => row.remove());
+  list.appendChild(row);
+});
+
+function collectVariants() {
+  const list = document.getElementById('variants-list');
+  const rows = list.querySelectorAll('div');
+  return Array.from(rows).map(row => ({
+    size:           row.querySelector('[data-var="size"]').value.trim(),
+    flavor:         row.querySelector('[data-var="flavor"]').value.trim() || undefined,
+    price_modifier: parseFloat(row.querySelector('[data-var="price_modifier"]').value) || 0,
+  })).filter(v => v.size);
+}
+
+document.getElementById('add-cake-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const errEl  = document.getElementById('cake-form-error');
+  const succEl = document.getElementById('cake-form-success');
+  errEl.style.display = 'none'; succEl.style.display = 'none';
+  const btn = document.getElementById('add-cake-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+
+  const name  = document.getElementById('cake-name').value.trim();
+  const price = parseFloat(document.getElementById('cake-price').value);
+  const desc  = document.getElementById('cake-desc').value.trim();
+
+  if (!name || !price) {
+    errEl.style.display = 'block'; errEl.textContent = 'Name and price are required.';
+    btn.disabled = false; btn.textContent = 'Add Cake'; return;
+  }
+
+  try {
+    const variants = collectVariants();
+    const payload  = { name, base_price: price, description: desc || undefined };
+    if (variants.length) payload.variants = variants;
+    const cake = await adminCreateCake(payload);
+    succEl.style.display = 'block';
+    succEl.textContent = `✓ "${cake.name}" added (ID: ${cake.id})${variants.length ? ` with ${variants.length} variant(s)` : ''}`;
+    document.getElementById('add-cake-form').reset();
+    document.getElementById('variants-list').innerHTML = '';
+    showToast(`Cake added: ${cake.name}`, 'success');
+  } catch (ex) {
+    errEl.style.display = 'block'; errEl.textContent = 'Error: ' + ex.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Add Cake';
+  }
+});
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  try { await logout(); } catch {}
+  window.location.href = './login.html';
+});
+
+document.getElementById('refresh-all-btn').addEventListener('click', () => {
+  loadOrders(); loadCakes(); loadCustomers(); showToast('Refreshed', 'success');
+});
+
+/* ── Customers ── */
+async function loadCustomers() {
+  const tbody   = document.getElementById('customers-body');
+  const countEl = document.getElementById('customers-count');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>';
+  try {
+    const res = await fetch('http://localhost:8080/admin/customers', { credentials: 'include' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const customers = await res.json();
+    if (countEl) countEl.textContent = `${customers.length} customers`;
+    if (!customers.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem">No customers yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = customers.map(c => `
+      <tr>
+        <td>#${c.id}</td>
+        <td><strong>${c.name}</strong></td>
+        <td><a href="tel:${c.phone}">${c.phone}</a></td>
+        <td>${c.email ? `<a href="mailto:${c.email}">${c.email}</a>` : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td><a href="#" class="view-orders-link" data-customer-id="${c.id}" style="color:var(--gold);font-size:.85rem">View Orders →</a></td>
+      </tr>
+    `).join('');
+    tbody.querySelectorAll('.view-orders-link').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        switchTab('orders');
+        showToast(`Filtered to customer #${link.dataset.customerId} (show all orders feature)`, 'info');
+      });
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem">Failed: ${e.message}</td></tr>`;
+  }
+}
+
+// Auth guard — verify session before showing dashboard
+async function checkAuth() {
+  const guard  = document.getElementById('auth-guard');
+  const layout = document.getElementById('admin-layout');
+  try {
+    // Try fetching a protected endpoint; if it fails with 401/403 we redirect
+    const res = await fetch('http://localhost:8080/admin/orders', { credentials: 'include' });
+    if (res.status === 401 || res.status === 403) {
+      window.location.href = './login.html';
+      return;
+    }
+    // Auth OK — show dashboard
+    guard.style.display = 'none';
+    layout.style.display = 'flex';
+    loadOrders();
+    loadCakes();
+  } catch {
+    // Server unreachable — still show dashboard but warn
+    guard.style.display = 'none';
+    layout.style.display = 'flex';
+    showToast('Cannot reach server. Make sure it is running.', 'error');
+    loadOrders();
+    loadCakes();
+  }
+}
+
+checkAuth();
+</script>
+</body>
+</html>
