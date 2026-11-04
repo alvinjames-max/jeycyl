@@ -1,31 +1,31 @@
 services:
-  # 1. The Go Backend Service
+  # 1. Go REST API Backend
   - type: web
-    name: go-backend
-    env: go
-    buildCommand: go build -o main ./cmd/server/main.go
-    startCommand: ./main
+    name: jeycyl-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: PORT
         value: 8080
-      - key: DATABASE_URL
-        value: /data/orders.db
-    disk:
-      name: sqlite-storage
-      mountPath: /data
-      sizeGB: 1
+      - key: DB_PATH
+        value: /app/data/orders.db
+      - key: UPLOAD_DIR
+        value: /app/uploads
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FRONTEND_ORIGIN
+        value: "*"
 
-  # 2. The Next.js Frontend Service
+  # 2. Next.js Static Frontend
   - type: web
-    name: nextjs-frontend
-    env: node
+    name: jeycyl-frontend
+    runtime: static
+    plan: free
     rootDir: frontend
-    buildCommand: npm run build
-    startCommand: npm run start
-    envVars:
-      - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: go-backend
-          property: url
-
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./out
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
