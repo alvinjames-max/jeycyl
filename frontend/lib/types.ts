@@ -124,4 +124,9 @@ export interface CreateCakePayload {
   description?: string;
   base_price: number;
   image_url?: string;
+  variants?: Array<{
+    size: string;
+    flavor?: string;
+    price_modifier: number;
+  }>;
 }

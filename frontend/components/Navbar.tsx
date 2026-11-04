@@ -34,7 +34,7 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-7">
             <Link
               href="/"
               className={`text-sm font-medium tracking-wide transition-colors ${
@@ -43,7 +43,27 @@ export function Navbar() {
                   : "text-[#3D1436]/80 hover:text-[#3D1436]"
               }`}
             >
-              Cakes Catalog
+              Home
+            </Link>
+            <Link
+              href="/menu"
+              className={`text-sm font-medium tracking-wide transition-colors ${
+                pathname === "/menu"
+                  ? "text-[#3D1436] font-semibold border-b-2 border-[#C9A227] pb-1"
+                  : "text-[#3D1436]/80 hover:text-[#3D1436]"
+              }`}
+            >
+              Menu
+            </Link>
+            <Link
+              href="/track"
+              className={`text-sm font-medium tracking-wide transition-colors ${
+                pathname.startsWith("/track")
+                  ? "text-[#3D1436] font-semibold border-b-2 border-[#C9A227] pb-1"
+                  : "text-[#3D1436]/80 hover:text-[#3D1436]"
+              }`}
+            >
+              Track Order
             </Link>
             <Link
               href="/#about"
@@ -60,7 +80,7 @@ export function Navbar() {
               }`}
             >
               <ShieldCheck className="w-4 h-4 text-[#C9A227]" />
-              <span>Admin Portal</span>
+              <span>Admin</span>
             </Link>
           </nav>
 
@@ -103,7 +123,21 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="block px-3 py-2 rounded-lg text-base font-medium text-[#3D1436] hover:bg-[#F3D7E0]"
             >
-              Cakes Catalog
+              Home
+            </Link>
+            <Link
+              href="/menu"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg text-base font-medium text-[#3D1436] hover:bg-[#F3D7E0]"
+            >
+              Menu Catalog
+            </Link>
+            <Link
+              href="/track"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg text-base font-medium text-[#3D1436] hover:bg-[#F3D7E0]"
+            >
+              Track Order
             </Link>
             <Link
               href="/#about"

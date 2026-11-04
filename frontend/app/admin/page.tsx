@@ -20,8 +20,14 @@ import {
   Eye,
   EyeOff,
   Filter,
+  Users,
+  Trash2,
+  Phone,
+  Mail,
+  MapPin,
+  X,
 } from "lucide-react";
-import { Cake, Order, OrderStatus } from "@/lib/types";
+import { Cake, Order, OrderStatus, Customer } from "@/lib/types";
 import { api, resolveImageUrl } from "@/lib/api";
 import { ScallopedCardTrim } from "@/components/FrostingScallop";
 
@@ -39,7 +45,8 @@ export default function AdminDashboardPage() {
   const router = useRouter();
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"orders" | "cakes">("orders");
+  const [activeTab, setActiveTab] = useState<"orders" | "cakes" | "customers">("orders");
+  const [customerFilterId, setCustomerFilterId] = useState<number | null>(null);
 
   // Auth & General Loading state
   const [authChecking, setAuthChecking] = useState(true);
@@ -58,12 +65,24 @@ export default function AdminDashboardPage() {
   const [cakesError, setCakesError] = useState<string | null>(null);
   const [togglingCakeId, setTogglingCakeId] = useState<number | null>(null);
 
+  // Customers State
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [customersError, setCustomersError] = useState<string | null>(null);
+
+  // Delete Cake State
+  const [cakeToDelete, setCakeToDelete] = useState<Cake | null>(null);
+  const [deletingCakeId, setDeletingCakeId] = useState<number | null>(null);
+
   // Add Cake Modal / Form State
   const [showAddCakeModal, setShowAddCakeModal] = useState(false);
   const [newCakeName, setNewCakeName] = useState("");
   const [newCakeDesc, setNewCakeDesc] = useState("");
   const [newCakePrice, setNewCakePrice] = useState("");
   const [newCakeImageUrl, setNewCakeImageUrl] = useState("");
+  const [newCakeVariants, setNewCakeVariants] = useState<
+    Array<{ size: string; flavor: string; price_modifier: string }>
+  >([]);
   const [creatingCake, setCreatingCake] = useState(false);
   const [addCakeError, setAddCakeError] = useState<string | null>(null);
 
@@ -107,10 +126,42 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
+  // Load customers
+  const loadCustomers = useCallback(async () => {
+    setCustomersLoading(true);
+    setCustomersError(null);
+    try {
+      const data = await api.getAdminCustomers();
+      setCustomers(data);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to load customers";
+      setCustomersError(msg);
+    } finally {
+      setCustomersLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadOrders();
     loadCakes();
-  }, [loadOrders, loadCakes]);
+    loadCustomers();
+  }, [loadOrders, loadCakes, loadCustomers]);
+
+  // Delete cake handler
+  const handleConfirmDeleteCake = async () => {
+    if (!cakeToDelete) return;
+    setDeletingCakeId(cakeToDelete.id);
+    try {
+      await api.deleteCake(cakeToDelete.id);
+      setCakes((prev) => prev.filter((c) => c.id !== cakeToDelete.id));
+      setCakeToDelete(null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to delete cake";
+      alert(msg);
+    } finally {
+      setDeletingCakeId(null);
+    }
+  };
 
   // Logout handler
   const handleLogout = async () => {
@@ -179,11 +230,20 @@ export default function AdminDashboardPage() {
 
     setCreatingCake(true);
     try {
+      const variantsPayload = newCakeVariants
+        .filter((v) => v.size.trim() !== "")
+        .map((v) => ({
+          size: v.size.trim(),
+          flavor: v.flavor.trim() || undefined,
+          price_modifier: parseFloat(v.price_modifier) || 0,
+        }));
+
       await api.createCake({
         name: newCakeName.trim(),
         description: newCakeDesc.trim() || undefined,
         base_price: price,
         image_url: newCakeImageUrl.trim() || undefined,
+        variants: variantsPayload.length > 0 ? variantsPayload : undefined,
       });
 
       // Reset and close
@@ -191,6 +251,7 @@ export default function AdminDashboardPage() {
       setNewCakeDesc("");
       setNewCakePrice("");
       setNewCakeImageUrl("");
+      setNewCakeVariants([]);
       setShowAddCakeModal(false);
       loadCakes();
     } catch (err: unknown) {
@@ -242,6 +303,9 @@ export default function AdminDashboardPage() {
 
   // Filtered orders
   const filteredOrders = orders.filter((o) => {
+    if (customerFilterId !== null && o.customer_id !== customerFilterId) {
+      return false;
+    }
     if (statusFilter === "all") return true;
     return o.status === statusFilter;
   });
@@ -283,6 +347,7 @@ export default function AdminDashboardPage() {
               onClick={() => {
                 loadOrders();
                 loadCakes();
+                loadCustomers();
               }}
               className="p-2.5 rounded-full bg-white border border-[#F0D5DD] text-[#3D1436] hover:bg-[#FFF3F6] transition-colors"
               title="Refresh data"
@@ -387,11 +452,11 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-3 border-b border-[#F0D5DD]">
+        <div className="flex items-center gap-3 border-b border-[#F0D5DD] overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab("orders")}
-            className={`pb-3 px-2 text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-3 px-2 text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
               activeTab === "orders"
                 ? "border-[#C9A227] text-[#3D1436]"
                 : "border-transparent text-[#3D1436]/60 hover:text-[#3D1436]"
@@ -404,7 +469,7 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={() => setActiveTab("cakes")}
-            className={`pb-3 px-2 text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-3 px-2 text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
               activeTab === "cakes"
                 ? "border-[#C9A227] text-[#3D1436]"
                 : "border-transparent text-[#3D1436]/60 hover:text-[#3D1436]"
@@ -413,7 +478,35 @@ export default function AdminDashboardPage() {
             <CakeIcon className="w-4 h-4 text-[#C9A227]" />
             <span>Cake Catalog Management</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("customers")}
+            className={`pb-3 px-2 text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+              activeTab === "customers"
+                ? "border-[#C9A227] text-[#3D1436]"
+                : "border-transparent text-[#3D1436]/60 hover:text-[#3D1436]"
+            }`}
+          >
+            <Users className="w-4 h-4 text-[#C9A227]" />
+            <span>Customers Directory ({customers.length})</span>
+          </button>
         </div>
+
+        {/* Customer Filter Notice in Orders Tab */}
+        {activeTab === "orders" && customerFilterId !== null && (
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FCF7E6] border border-[#C9A227]/40 text-xs text-[#8B6E13]">
+            <span className="font-semibold">
+              🔍 Showing orders placed by Customer #{customerFilterId}
+            </span>
+            <button
+              onClick={() => setCustomerFilterId(null)}
+              className="font-bold underline text-[#3D1436] hover:text-black cursor-pointer"
+            >
+              Clear Customer Filter (Show All)
+            </button>
+          </div>
+        )}
 
         {/* ================= TAB 1: ORDERS ================= */}
         {activeTab === "orders" && (
@@ -745,36 +838,246 @@ export default function AdminDashboardPage() {
                           Cake ID #{cake.id}
                         </span>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleAvailability(cake)}
-                          disabled={togglingCakeId === cake.id}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-                            cake.is_available
-                              ? "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
-                              : "bg-[#EFF4EE] text-[#586E52] hover:bg-[#E2EDE0] border border-[#7C9473]/30"
-                          } disabled:opacity-50`}
-                        >
-                          {togglingCakeId === cake.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : cake.is_available ? (
-                            <>
-                              <EyeOff className="w-3.5 h-3.5" />
-                              <span>Deactivate</span>
-                            </>
-                          ) : (
-                            <>
-                              <Eye className="w-3.5 h-3.5" />
-                              <span>Activate</span>
-                            </>
-                          )}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setCakeToDelete(cake)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-red-600 hover:bg-red-50 border border-red-200 transition-colors"
+                            title="Delete cake from catalog"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleToggleAvailability(cake)}
+                            disabled={togglingCakeId === cake.id}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                              cake.is_available
+                                ? "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
+                                : "bg-[#EFF4EE] text-[#586E52] hover:bg-[#E2EDE0] border border-[#7C9473]/30"
+                            } disabled:opacity-50`}
+                          >
+                            {togglingCakeId === cake.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : cake.is_available ? (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5" />
+                                <span>Deactivate</span>
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Activate</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ================= TAB 3: CUSTOMERS ================= */}
+        {activeTab === "customers" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#F0D5DD]">
+              <div>
+                <h2 className="font-serif text-xl font-bold text-[#3D1436]">
+                  Registered Customer Directory
+                </h2>
+                <p className="text-xs text-[#3D1436]/70">
+                  Customers registered through order placement and direct lookup.
+                </p>
+              </div>
+
+              <div className="text-xs font-semibold text-[#8B6E13] bg-[#FCF7E6] border border-[#C9A227]/30 px-3 py-1.5 rounded-full">
+                {customers.length} Total Customers
+              </div>
+            </div>
+
+            {customersLoading && (
+              <div className="p-12 text-center bg-white rounded-3xl border border-[#F0D5DD]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#C9A227] mx-auto mb-2" />
+                <p className="text-xs text-[#3D1436]">Loading customers...</p>
+              </div>
+            )}
+
+            {!customersLoading && customersError && (
+              <div className="p-6 bg-red-50 border border-red-200 text-red-800 rounded-3xl text-xs flex items-center justify-between">
+                <span>{customersError}</span>
+                <button
+                  onClick={loadCustomers}
+                  className="font-bold underline text-red-900 ml-4"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {!customersLoading && !customersError && customers.length === 0 && (
+              <div className="p-16 text-center bg-white rounded-3xl border border-[#F0D5DD] space-y-3">
+                <Users className="w-12 h-12 text-[#C9A227] mx-auto opacity-70" />
+                <h3 className="font-serif text-xl font-bold text-[#3D1436]">
+                  No customers registered yet
+                </h3>
+                <p className="text-xs text-[#3D1436]/70 max-w-sm mx-auto">
+                  When customers place celebration cake orders, their contact and address profiles are safely logged here.
+                </p>
+              </div>
+            )}
+
+            {!customersLoading && !customersError && customers.length > 0 && (
+              <div className="bg-white rounded-3xl border border-[#F0D5DD] overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-[#3D1436]">
+                    <thead className="bg-[#FBEEF2]/70 text-[#3D1436] font-bold border-b border-[#F0D5DD]">
+                      <tr>
+                        <th className="py-3.5 px-4 sm:px-6">Customer</th>
+                        <th className="py-3.5 px-4">Contact Phone</th>
+                        <th className="py-3.5 px-4">Email Address</th>
+                        <th className="py-3.5 px-4">Delivery Address</th>
+                        <th className="py-3.5 px-4">Registered Date</th>
+                        <th className="py-3.5 px-4 text-right">Orders</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#FBEEF2]">
+                      {customers.map((c) => {
+                        const customerOrdersCount = orders.filter(
+                          (o) => o.customer_id === c.id
+                        ).length;
+
+                        return (
+                          <tr key={c.id} className="hover:bg-[#FFF3F6] transition-colors">
+                            <td className="py-4 px-4 sm:px-6">
+                              <div className="font-bold text-sm text-[#3D1436]">
+                                {c.name}
+                              </div>
+                              <span className="text-[11px] text-[#3D1436]/50">
+                                Customer ID #{c.id}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4">
+                              <a
+                                href={`tel:${c.phone}`}
+                                className="inline-flex items-center gap-1.5 text-xs text-[#586E52] hover:underline font-semibold"
+                              >
+                                <Phone className="w-3.5 h-3.5 text-[#7C9473]" />
+                                <span>{c.phone}</span>
+                              </a>
+                            </td>
+                            <td className="py-4 px-4">
+                              {c.email ? (
+                                <a
+                                  href={`mailto:${c.email}`}
+                                  className="inline-flex items-center gap-1.5 text-xs text-[#3D1436]/80 hover:underline"
+                                >
+                                  <Mail className="w-3.5 h-3.5 text-[#C9A227]" />
+                                  <span>{c.email}</span>
+                                </a>
+                              ) : (
+                                <span className="text-[#3D1436]/40 italic">Not provided</span>
+                              )}
+                            </td>
+                            <td className="py-4 px-4 max-w-xs">
+                              {c.address ? (
+                                <div className="flex items-start gap-1 text-xs text-[#3D1436]/80">
+                                  <MapPin className="w-3.5 h-3.5 text-[#C9A227] shrink-0 mt-0.5" />
+                                  <span className="truncate">{c.address}</span>
+                                </div>
+                              ) : (
+                                <span className="text-[#3D1436]/40 italic">—</span>
+                              )}
+                            </td>
+                            <td className="py-4 px-4 text-xs text-[#3D1436]/60">
+                              {c.created_at
+                                ? new Date(c.created_at).toLocaleDateString("en-KE", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                : "—"}
+                            </td>
+                            <td className="py-4 px-4 text-right">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCustomerFilterId(c.id);
+                                  setActiveTab("orders");
+                                }}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-[#FBEEF2] text-[#3D1436] hover:bg-[#F3D7E0] transition-colors whitespace-nowrap"
+                              >
+                                <span>View Orders</span>
+                                <span className="bg-[#C9A227] text-[#3D1436] rounded-full px-1.5 py-0.2 text-[10px]">
+                                  {customerOrdersCount}
+                                </span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= DELETE CAKE CONFIRMATION MODAL ================= */}
+        {cakeToDelete && (
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className="fixed inset-0"
+              onClick={() => setCakeToDelete(null)}
+              aria-hidden="true"
+            />
+            <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-[#F0D5DD] p-6 z-10 space-y-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-[#3D1436]">
+                  Delete &quot;{cakeToDelete.name}&quot;?
+                </h3>
+                <p className="text-xs text-[#3D1436]/70 mt-1">
+                  This will permanently delete Cake #{cakeToDelete.id} from your catalog. This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCakeToDelete(null)}
+                  disabled={deletingCakeId !== null}
+                  className="px-5 py-2.5 rounded-full text-xs font-semibold text-[#3D1436] hover:bg-[#FBEEF2]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteCake}
+                  disabled={deletingCakeId !== null}
+                  className="px-5 py-2.5 rounded-full text-xs font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+                >
+                  {deletingCakeId !== null ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Deleting...
+                    </>
+                  ) : (
+                    "Yes, Delete Cake"
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -893,6 +1196,87 @@ export default function AdminDashboardPage() {
                   <p className="text-[11px] text-[#3D1436]/60 mt-1">
                     You can also upload a direct image file from your computer immediately after creation.
                   </p>
+                </div>
+
+                {/* Variant Builder */}
+                <div className="pt-3 border-t border-[#FBEEF2]">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-semibold text-[#3D1436] uppercase tracking-wider">
+                      Size & Flavour Variants <span className="font-normal text-[#3D1436]/60">(Optional)</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNewCakeVariants((prev) => [
+                          ...prev,
+                          { size: "", flavor: "", price_modifier: "0" },
+                        ])
+                      }
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#C9A227] hover:underline cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Variant</span>
+                    </button>
+                  </div>
+
+                  {newCakeVariants.length > 0 && (
+                    <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
+                      {newCakeVariants.map((v, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            placeholder="Size (e.g. 1kg)"
+                            value={v.size}
+                            onChange={(e) =>
+                              setNewCakeVariants((prev) =>
+                                prev.map((item, i) =>
+                                  i === idx ? { ...item, size: e.target.value } : item
+                                )
+                              )
+                            }
+                            className="w-1/3 px-2.5 py-1.5 rounded-lg border border-[#F0D5DD] text-xs bg-[#FBEEF2]/20 focus:bg-white"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Flavour (e.g. Vanilla)"
+                            value={v.flavor}
+                            onChange={(e) =>
+                              setNewCakeVariants((prev) =>
+                                prev.map((item, i) =>
+                                  i === idx ? { ...item, flavor: e.target.value } : item
+                                )
+                              )
+                            }
+                            className="w-1/3 px-2.5 py-1.5 rounded-lg border border-[#F0D5DD] text-xs bg-[#FBEEF2]/20 focus:bg-white"
+                          />
+                          <input
+                            type="number"
+                            placeholder="+/- KES"
+                            step="50"
+                            value={v.price_modifier}
+                            onChange={(e) =>
+                              setNewCakeVariants((prev) =>
+                                prev.map((item, i) =>
+                                  i === idx ? { ...item, price_modifier: e.target.value } : item
+                                )
+                              )
+                            }
+                            className="w-1/4 px-2.5 py-1.5 rounded-lg border border-[#F0D5DD] text-xs bg-[#FBEEF2]/20 focus:bg-white"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setNewCakeVariants((prev) => prev.filter((_, i) => i !== idx))
+                            }
+                            className="text-gray-400 hover:text-red-500 p-1 text-xs"
+                            title="Remove variant"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-4 flex items-center justify-end gap-3">

@@ -237,6 +237,19 @@ export const api = {
     return response.json();
   },
 
+  async deleteCake(id: number): Promise<void> {
+    await apiFetch<void>(`/admin/cakes/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async getAdminCustomers(): Promise<Customer[]> {
+    const data = await apiFetch<Customer[] | null>("/admin/customers", {
+      method: "GET",
+    });
+    return data || [];
+  },
+
   async updateOrderStatus(orderId: number, status: OrderStatus): Promise<void> {
     await apiFetch<void>(`/admin/orders/${orderId}/status`, {
       method: "PATCH",
@@ -244,3 +257,4 @@ export const api = {
     });
   },
 };
+

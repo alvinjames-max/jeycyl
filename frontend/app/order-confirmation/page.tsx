@@ -14,10 +14,12 @@ import {
   Loader2,
   AlertCircle,
   Sparkles,
+  Truck,
+  Share2,
 } from "lucide-react";
 import { Order, OrderStatus } from "@/lib/types";
 import { api } from "@/lib/api";
-import { FrostingScallop, ScallopedCardTrim } from "@/components/FrostingScallop";
+import { ScallopedCardTrim } from "@/components/FrostingScallop";
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
@@ -353,25 +355,47 @@ function OrderConfirmationContent() {
             )}
           </div>
 
-          {/* WhatsApp Notification Indicator */}
-          <div className="mt-6 p-4 rounded-2xl bg-white border border-[#F0D5DD] flex items-center gap-3 text-xs text-[#3D1436]/80">
-            <div className="w-8 h-8 rounded-full bg-[#EFF4EE] flex items-center justify-center shrink-0">
-              <MessageSquare className="w-4 h-4 text-[#7C9473]" />
+          {/* WhatsApp Notification Indicator & Quick Chat Link */}
+          <div className="mt-6 p-4 rounded-2xl bg-white border border-[#F0D5DD] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#3D1436]/80">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#EFF4EE] flex items-center justify-center shrink-0">
+                <MessageSquare className="w-4 h-4 text-[#7C9473]" />
+              </div>
+              <div>
+                <strong className="text-[#3D1436]">Automated WhatsApp Notification:</strong> When your order status changes to &quot;Baking&quot; or &quot;Out for Delivery&quot;, a notification will automatically be sent to your phone.
+              </div>
             </div>
-            <div>
-              <strong className="text-[#3D1436]">Automated WhatsApp Notification:</strong> When your order status changes to &quot;Baking&quot; or &quot;Out for Delivery&quot;, a notification will automatically be sent to your phone.
-            </div>
+            <a
+              href={`https://wa.me/254700000000?text=${encodeURIComponent(
+                `Hi Jeycyl Cakes! I placed order #${order.id}. Please confirm receipt.`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#EFF4EE] text-[#586E52] border border-[#7C9473]/30 hover:bg-[#E2EDE1] transition-colors whitespace-nowrap shrink-0"
+            >
+              <Share2 className="w-3.5 h-3.5 text-[#7C9473]" />
+              <span>Confirm on WhatsApp</span>
+            </a>
           </div>
 
           {/* Action CTAs */}
           <div className="mt-8 pt-6 border-t border-[#FBEEF2] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <Link
-              href="/"
-              className="btn-gold inline-flex items-center gap-2 px-8 py-3 rounded-full text-xs font-bold text-[#3D1436] shadow-sm hover:scale-102 transition-transform"
-            >
-              <span>Order Another Cake</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+              <Link
+                href={`/track?id=${order.id}`}
+                className="btn-gold inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs font-bold text-[#3D1436] shadow-sm hover:scale-102 transition-transform w-full sm:w-auto"
+              >
+                <Truck className="w-4 h-4" />
+                <span>Track Order Live</span>
+              </Link>
+              <Link
+                href="/menu"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs font-semibold text-[#3D1436] bg-[#FBEEF2] hover:bg-[#F3D7E0] transition-colors w-full sm:w-auto"
+              >
+                <span>Order Another Cake</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
 
             <Link
               href="/#about"

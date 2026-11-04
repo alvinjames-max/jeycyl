@@ -72,18 +72,30 @@ export function Footer() {
           {/* Col 4: Quick links & Payments */}
           <div className="space-y-3">
             <h4 className="font-serif text-lg font-semibold text-[#C9A227]">
-              Lipa na M-Pesa
+              Lipa na M-Pesa & Tracking
             </h4>
             <p className="text-sm text-[#FBEEF2]/80 leading-relaxed font-sans">
-              We accept M-Pesa, Cash, and Card payments. Orders confirmed upon receipt.
+              Till: 987654. We accept M-Pesa, Cash, and Card. Track live progress anytime.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap gap-2">
+              <Link
+                href="/track"
+                className="inline-flex items-center gap-1.5 text-xs text-[#FBEEF2]/80 hover:text-[#C9A227] transition-colors py-1 px-2.5 rounded bg-white/5 border border-white/10"
+              >
+                <span>Track Order</span>
+              </Link>
+              <Link
+                href="/menu"
+                className="inline-flex items-center gap-1.5 text-xs text-[#FBEEF2]/80 hover:text-[#C9A227] transition-colors py-1 px-2.5 rounded bg-white/5 border border-white/10"
+              >
+                <span>Menu</span>
+              </Link>
               <Link
                 href="/admin"
                 className="inline-flex items-center gap-1.5 text-xs text-[#FBEEF2]/70 hover:text-[#C9A227] transition-colors py-1 px-2.5 rounded bg-white/5 border border-white/10"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-[#C9A227]" />
-                <span>Bakery Staff Login</span>
+                <span>Staff Login</span>
               </Link>
             </div>
           </div>
