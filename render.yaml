@@ -3,14 +3,13 @@ services:
   - type: web
     name: go-backend
     env: go
-    rootDir: backend
-    buildCommand: go build -o main .
+    buildCommand: go build -o main ./cmd/server/main.go
     startCommand: ./main
     envVars:
       - key: PORT
         value: 8080
       - key: DATABASE_URL
-        value: /data/sqlite.db
+        value: /data/orders.db
     disk:
       name: sqlite-storage
       mountPath: /data
