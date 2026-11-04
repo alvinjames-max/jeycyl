@@ -3,6 +3,7 @@ services:
   - type: web
     name: go-backend
     env: go
+    rootDir: backend
     buildCommand: go build -o main .
     startCommand: ./main
     envVars:
@@ -10,7 +11,6 @@ services:
         value: 8080
       - key: DATABASE_URL
         value: /data/sqlite.db
-    # Attaches a permanent disk so SQLite data is safe when the server restarts
     disk:
       name: sqlite-storage
       mountPath: /data
@@ -20,6 +20,7 @@ services:
   - type: web
     name: nextjs-frontend
     env: node
+    rootDir: frontend
     buildCommand: npm run build
     startCommand: npm run start
     envVars:
@@ -28,3 +29,4 @@ services:
           type: web
           name: go-backend
           property: url
+
