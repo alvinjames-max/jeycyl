@@ -133,3 +133,37 @@ func (r *CakeRepository) SetImageURL(id int64, imageURL string) error {
 
 	return nil
 }
+
+func (r *CakeRepository) Delete(id int64) error {
+	_, err := r.db.Exec(`DELETE FROM cake_variants WHERE cake_id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("deleting cake variants for cake %d: %w", id, err)
+	}
+
+	res, err := r.db.Exec(`DELETE FROM cakes WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("deleting cake %d: %w", id, err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("checking rows affected for cake %d: %w", id, err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("cake %d not found", id)
+	}
+
+	return nil
+}
+
+func (r *CakeRepository) AddVariant(cakeID int64, v models.CakeVariant) error {
+	_, err := r.db.Exec(`
+		INSERT INTO cake_variants (cake_id, size, flavor, price_modifier)
+		VALUES (?, ?, ?, ?)
+	`, cakeID, v.Size, v.Flavor, v.PriceModifier)
+	if err != nil {
+		return fmt.Errorf("adding variant to cake %d: %w", cakeID, err)
+	}
+	return nil
+}
+

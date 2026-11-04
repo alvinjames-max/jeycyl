@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -72,8 +73,10 @@ func setupTestServer(t *testing.T) (http.Handler, *repository.AdminRepository, [
 	adminMux.HandleFunc("GET /admin/orders", adminHandler.ListOrders)
 	adminMux.HandleFunc("POST /admin/cakes", adminHandler.CreateCake)
 	adminMux.HandleFunc("PATCH /admin/cakes/{id}", withID("id", adminHandler.SetCakeAvailability))
+	adminMux.HandleFunc("DELETE /admin/cakes/{id}", withID("id", adminHandler.DeleteCake))
 	adminMux.HandleFunc("POST /admin/cakes/{id}/image", withID("id", adminHandler.UploadCakeImage))
 	adminMux.HandleFunc("PATCH /admin/orders/{id}/status", withID("id", adminHandler.UpdateOrderStatus))
+	adminMux.HandleFunc("GET /admin/customers", customerHandler.ListCustomers)
 	mux.Handle("/admin/", middleware.RequireAdmin(sessionSecret)(adminMux))
 
 	return middleware.CORS("http://localhost:3000")(mux), adminRepo, sessionSecret
@@ -243,4 +246,49 @@ func TestFullHTTPFlow(t *testing.T) {
 	if len(adminOrders) != 1 || adminOrders[0].Status != models.OrderStatusPaid {
 		t.Fatalf("expected 1 paid order in admin list, got %+v", adminOrders)
 	}
+
+	// 10. Admin list customers
+	req = httptest.NewRequest(http.MethodGet, "/admin/customers", nil)
+	req.Header.Set("Authorization", "Bearer "+loginResp.Token)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("admin list customers failed: status %d", rec.Code)
+	}
+	var adminCustomers []models.Customer
+	json.Unmarshal(rec.Body.Bytes(), &adminCustomers)
+	if len(adminCustomers) != 1 || adminCustomers[0].Phone != "+254711223344" {
+		t.Fatalf("expected customer with phone +254711223344, got %+v", adminCustomers)
+	}
+
+	// 11. Admin delete cake (create a disposable cake first)
+	disposableCake := &models.Cake{
+		Name:        "To be deleted",
+		BasePrice:   1500,
+		IsAvailable: true,
+	}
+	cakeBody, _ := json.Marshal(disposableCake)
+	req = httptest.NewRequest(http.MethodPost, "/admin/cakes", bytes.NewReader(cakeBody))
+	req.Header.Set("Authorization", "Bearer "+loginResp.Token)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("failed to create disposable cake: status %d", rec.Code)
+	}
+	var createdDispCake models.Cake
+	json.Unmarshal(rec.Body.Bytes(), &createdDispCake)
+
+	// Now delete it
+	delURL := fmt.Sprintf("/admin/cakes/%d", createdDispCake.ID)
+	req = httptest.NewRequest(http.MethodDelete, delURL, nil)
+	req.Header.Set("Authorization", "Bearer "+loginResp.Token)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("failed to delete cake: status %d", rec.Code)
+	}
 }
+

@@ -30,11 +30,18 @@ func NewAdminHandler(cakeRepo *repository.CakeRepository, orderService *services
 	}
 }
 
+type createCakeVariant struct {
+	Size          string  `json:"size"`
+	Flavor        string  `json:"flavor,omitempty"`
+	PriceModifier float64 `json:"price_modifier"`
+}
+
 type createCakeRequest struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description,omitempty"`
-	BasePrice   float64 `json:"base_price"`
-	ImageURL    string  `json:"image_url,omitempty"`
+	Name        string              `json:"name"`
+	Description string              `json:"description,omitempty"`
+	BasePrice   float64             `json:"base_price"`
+	ImageURL    string              `json:"image_url,omitempty"`
+	Variants    []createCakeVariant `json:"variants,omitempty"`
 }
 
 func (h *AdminHandler) CreateCake(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +75,22 @@ func (h *AdminHandler) CreateCake(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cake.ID = id
+
+	for _, v := range req.Variants {
+		if strings.TrimSpace(v.Size) != "" {
+			variant := models.CakeVariant{
+				CakeID:        id,
+				Size:          strings.TrimSpace(v.Size),
+				Flavor:        strings.TrimSpace(v.Flavor),
+				PriceModifier: v.PriceModifier,
+			}
+			if err := h.cakeRepo.AddVariant(id, variant); err != nil {
+				log.Printf("adding variant to cake %d: %v", id, err)
+			} else {
+				cake.Variants = append(cake.Variants, variant)
+			}
+		}
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -228,6 +251,21 @@ func (h *AdminHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(orders); err != nil {
 		log.Printf("encoding orders response: %v", err)
 	}
+}
+
+func (h *AdminHandler) DeleteCake(w http.ResponseWriter, r *http.Request, cakeID int64) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := h.cakeRepo.Delete(cakeID); err != nil {
+		log.Printf("deleting cake %d: %v", cakeID, err)
+		http.Error(w, "failed to delete cake", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func randomFilename(ext string) (string, error) {

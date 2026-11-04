@@ -75,12 +75,16 @@ func main() {
 	mux.HandleFunc("PATCH /admin/cakes/{id}", func(w http.ResponseWriter, r *http.Request) {
 		requireAdmin(withID("id", adminHandler.SetCakeAvailability)).ServeHTTP(w, r)
 	})
+	mux.HandleFunc("DELETE /admin/cakes/{id}", func(w http.ResponseWriter, r *http.Request) {
+		requireAdmin(withID("id", adminHandler.DeleteCake)).ServeHTTP(w, r)
+	})
 	mux.HandleFunc("POST /admin/cakes/{id}/image", func(w http.ResponseWriter, r *http.Request) {
 		requireAdmin(withID("id", adminHandler.UploadCakeImage)).ServeHTTP(w, r)
 	})
 	mux.HandleFunc("PATCH /admin/orders/{id}/status", func(w http.ResponseWriter, r *http.Request) {
 		requireAdmin(withID("id", adminHandler.UpdateOrderStatus)).ServeHTTP(w, r)
 	})
+	mux.Handle("GET /admin/customers", requireAdmin(http.HandlerFunc(customerHandler.ListCustomers)))
 
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadDir))))
 

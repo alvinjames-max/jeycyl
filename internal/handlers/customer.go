@@ -103,3 +103,26 @@ func (h *CustomerHandler) GetCustomer(w http.ResponseWriter, r *http.Request, id
 		log.Printf("encoding customer response: %v", err)
 	}
 }
+
+func (h *CustomerHandler) ListCustomers(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	customers, err := h.customerRepo.ListAll()
+	if err != nil {
+		log.Printf("listing customers: %v", err)
+		http.Error(w, "failed to list customers", http.StatusInternalServerError)
+		return
+	}
+	if customers == nil {
+		customers = []models.Customer{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(customers); err != nil {
+		log.Printf("encoding customers response: %v", err)
+	}
+}
+

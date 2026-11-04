@@ -65,3 +65,30 @@ func (r *CustomerRepository) GetByPhone(phone string) (*models.Customer, error) 
 
 	return &c, nil
 }
+
+func (r *CustomerRepository) ListAll() ([]models.Customer, error) {
+	rows, err := r.db.Query(`
+		SELECT id, name, phone, email, address, created_at
+		FROM customers
+		ORDER BY id DESC
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("listing customers: %w", err)
+	}
+	defer rows.Close()
+
+	var list []models.Customer
+	for rows.Next() {
+		var c models.Customer
+		if err := rows.Scan(&c.ID, &c.Name, &c.Phone, &c.Email, &c.Address, &c.CreatedAt); err != nil {
+			return nil, fmt.Errorf("scanning customer: %w", err)
+		}
+		list = append(list, c)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating customers: %w", err)
+	}
+
+	return list, nil
+}
+
