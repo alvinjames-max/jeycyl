@@ -1,0 +1,30 @@
+services:
+  # 1. The Go Backend Service
+  - type: web
+    name: go-backend
+    env: go
+    buildCommand: go build -o main .
+    startCommand: ./main
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DATABASE_URL
+        value: /data/sqlite.db
+    # Attaches a permanent disk so SQLite data is safe when the server restarts
+    disk:
+      name: sqlite-storage
+      mountPath: /data
+      sizeGB: 1
+
+  # 2. The Next.js Frontend Service
+  - type: web
+    name: nextjs-frontend
+    env: node
+    buildCommand: npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: go-backend
+          property: url
